@@ -16,7 +16,10 @@ For the first generation, see [node-shellies](https://github.com/alexryd/node-sh
 - [Shelly Plus PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPMMini)
 - [Shelly Plus 2 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus2PM)
 - [Shelly Plus I4 +V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusI4)
+- [Shelly Plus Plug S](https://kb.shelly.cloud/knowledge-base/shelly-plus-plug-s-1)
 - [Shelly Plus Plug US](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlugUS)
+- [Shelly Plus Plug UK](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPlugUK)
+- [Shelly Plus Plug IT](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPlugIT)
 - [Shelly Plus H&T +V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusHT)
 - [Shelly Plus 0-10V Dimmer](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus10V)
 - [Shelly Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmer0110VPMG3) <sup>1</sup>

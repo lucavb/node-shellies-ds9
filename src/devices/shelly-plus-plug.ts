@@ -1,4 +1,4 @@
-import { component, Device } from './base';
+import { component, Device } from "./base";
 import {
   BluetoothLowEnergy,
   Cloud,
@@ -7,11 +7,11 @@ import {
   Script,
   Switch,
   WiFi,
-} from '../components';
+} from "../components";
 
 export class ShellyPlusPlugUs extends Device {
-  static readonly model: string = 'SNPL-00116US';
-  static readonly modelName: string = 'Shelly Plus Plug US';
+  static readonly model: string = "SNPL-00116US";
+  static readonly modelName: string = "Shelly Plus Plug US";
 
   @component
   readonly wifi = new WiFi(this);
@@ -37,10 +37,23 @@ export class ShellyPlusPlugUs extends Device {
 
 Device.registerClass(ShellyPlusPlugUs);
 
-
 export class ShellyPlusPlugEu extends ShellyPlusPlugUs {
-  static readonly model: string = 'SNPL-00112EU';
-  static readonly modelName: string = 'Shelly Plus Plug EU';
+  static readonly model: string = "SNPL-00112EU";
+  static readonly modelName: string = "Shelly Plus Plug EU";
 }
 
 Device.registerClass(ShellyPlusPlugEu);
+
+export class ShellyPlusPlugUk extends ShellyPlusPlugUs {
+  static readonly model: string = "SNPL-00112UK";
+  static readonly modelName: string = "Shelly Plus Plug UK";
+}
+
+Device.registerClass(ShellyPlusPlugUk);
+
+export class ShellyPlusPlugIt extends ShellyPlusPlugUs {
+  static readonly model: string = "SNPL-00110IT";
+  static readonly modelName: string = "Shelly Plus Plug IT";
+}
+
+Device.registerClass(ShellyPlusPlugIt);
