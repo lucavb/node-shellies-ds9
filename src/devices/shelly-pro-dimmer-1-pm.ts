@@ -64,4 +64,4 @@ export class ShellyDimmer extends ShellyProDimmer1Pm {
   static readonly modelName: string = "Shelly Dimmer";
 }
 
-Device.registerClass(ShellyProDimmer1Pm2);
+Device.registerClass(ShellyDimmer);
