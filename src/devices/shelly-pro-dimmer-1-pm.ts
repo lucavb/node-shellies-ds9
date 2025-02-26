@@ -1,4 +1,4 @@
-import { component, Device } from './base';
+import { component, Device } from "./base";
 import {
   BluetoothLowEnergy,
   Cloud,
@@ -10,11 +10,11 @@ import {
   Light,
   Ui,
   WiFi,
-} from '../components';
+} from "../components";
 
 export class ShellyProDimmer1Pm extends Device {
-  static readonly model: string = 'SPDM-001PE01EU';
-  static readonly modelName: string = 'Shelly Pro Dimmer 1PM';
+  static readonly model: string = "SPDM-001PE01EU";
+  static readonly modelName: string = "Shelly Pro Dimmer 1PM";
 
   @component
   readonly wifi = new WiFi(this);
@@ -51,3 +51,17 @@ export class ShellyProDimmer1Pm extends Device {
 }
 
 Device.registerClass(ShellyProDimmer1Pm);
+
+export class ShellyProDimmer1Pm2 extends ShellyProDimmer1Pm {
+  static readonly model: string = "SPCC-001PE10EU";
+  static readonly modelName: string = "Shelly Pro Dimmer 0/1-10V PM";
+}
+
+Device.registerClass(ShellyProDimmer1Pm2);
+
+export class ShellyDimmer extends ShellyProDimmer1Pm {
+  static readonly model: string = "S3DM-0A101WWL";
+  static readonly modelName: string = "Shelly Dimmer";
+}
+
+Device.registerClass(ShellyProDimmer1Pm2);

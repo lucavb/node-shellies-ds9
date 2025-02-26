@@ -22,7 +22,8 @@ For the first generation, see [node-shellies](https://github.com/alexryd/node-sh
 - [Shelly Plus Plug IT](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPlugIT)
 - [Shelly Plus H&T +V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusHT)
 - [Shelly Plus 0-10V Dimmer](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus10V)
-- [Shelly Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmer0110VPMG3) <sup>1</sup>
+- [Shelly Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmer0110VPMG3)
+- [Shelly Dimmer](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmerG3)
 - [Shelly Pro 1](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro1)
 - [Shelly Pro 1 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro1PM)
 - [Shelly Pro 2](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro2)
@@ -31,6 +32,7 @@ For the first generation, see [node-shellies](https://github.com/alexryd/node-sh
 - [Shelly Pro 4 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro4PM)
 - [Shelly Pro Dual Cover PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDualCoverPM)
 - [Shelly Pro Dimmer 1PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer1PM)
+- [Shelly Pro Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer0110VPM)
 - [Shelly Pro Dimmer 2PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer2PM)
 
 <sup>1</sup> Support for outbound websockets is a work in progress.
