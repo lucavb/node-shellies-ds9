@@ -9,9 +9,10 @@
     ],
     "scripts": {
         "build": "rimraf ./dist && tsc",
-        "lint": "eslint \"src/**/*.{ts,js}\" --max-warnings=0",
+        "cq:eslint": "eslint \"src/**/*.{ts,js}\" --max-warnings=0",
+        "cq:eslint:fix": "eslint \"src/**/*.{ts,js}\" --fix",
         "test": "jest",
-        "preversion": "npm run build && npm run lint && npm test",
+        "preversion": "npm run build && npm run cq:eslint && npm test",
         "postversion": "git push && git push --tags",
         "pretty": "prettier --write \"./**/*.{js,jsx,json}\""
     },
