@@ -41,33 +41,27 @@ For the first generation, see [node-shellies](https://github.com/alexryd/node-sh
 ## Basic usage example
 
 ```typescript
-import {
-  Device,
-  DeviceId,
-  MdnsDeviceDiscoverer,
-  Shellies,
-  ShellyPlus1,
-} from "shellies-ds9";
+import { Device, DeviceId, MdnsDeviceDiscoverer, Shellies, ShellyPlus1 } from 'shellies-ds9';
 
 const shellies = new Shellies();
 
 // handle discovered devices
-shellies.on("add", async (device: Device) => {
-  console.log(`${device.modelName} discovered`);
-  console.log(`ID: ${device.id}`);
+shellies.on('add', async (device: Device) => {
+    console.log(`${device.modelName} discovered`);
+    console.log(`ID: ${device.id}`);
 
-  // use instanceof to determine the device model
-  if (device instanceof ShellyPlus1) {
-    const plus1 = device as ShellyPlus1;
+    // use instanceof to determine the device model
+    if (device instanceof ShellyPlus1) {
+        const plus1 = device as ShellyPlus1;
 
-    // toggle the switch
-    await plus1.switch0.toggle();
-  }
+        // toggle the switch
+        await plus1.switch0.toggle();
+    }
 });
 
 // handle asynchronous errors
-shellies.on("error", (deviceId: DeviceId, error: Error) => {
-  console.error("An error occured:", error.message);
+shellies.on('error', (deviceId: DeviceId, error: Error) => {
+    console.error('An error occured:', error.message);
 });
 
 // create an mDNS device discoverer

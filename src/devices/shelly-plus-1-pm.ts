@@ -1,68 +1,59 @@
-import { component, Device } from "./base";
-import {
-  BluetoothLowEnergy,
-  Cloud,
-  Input,
-  Mqtt,
-  OutboundWebSocket,
-  Script,
-  Switch,
-  WiFi,
-} from "../components";
+import { component, Device } from './base';
+import { BluetoothLowEnergy, Cloud, Input, Mqtt, OutboundWebSocket, Script, Switch, WiFi } from '../components';
 
 export class ShellyPlus1Pm extends Device {
-  static readonly model: string = "SNSW-001P16EU";
-  static readonly modelName: string = "Shelly Plus 1 PM";
+    static readonly model: string = 'SNSW-001P16EU';
+    static readonly modelName: string = 'Shelly Plus 1 PM';
 
-  @component
-  readonly wifi = new WiFi(this);
+    @component
+    readonly wifi = new WiFi(this);
 
-  @component
-  readonly bluetoothLowEnergy = new BluetoothLowEnergy(this);
+    @component
+    readonly bluetoothLowEnergy = new BluetoothLowEnergy(this);
 
-  @component
-  readonly cloud = new Cloud(this);
+    @component
+    readonly cloud = new Cloud(this);
 
-  @component
-  readonly mqtt = new Mqtt(this);
+    @component
+    readonly mqtt = new Mqtt(this);
 
-  @component
-  readonly outboundWebSocket = new OutboundWebSocket(this);
+    @component
+    readonly outboundWebSocket = new OutboundWebSocket(this);
 
-  @component
-  readonly input0 = new Input(this, 0);
+    @component
+    readonly input0 = new Input(this, 0);
 
-  @component
-  readonly switch0 = new Switch(this, 0);
+    @component
+    readonly switch0 = new Switch(this, 0);
 
-  @component
-  readonly script = new Script(this);
+    @component
+    readonly script = new Script(this);
 }
 
 Device.registerClass(ShellyPlus1Pm);
 
 export class ShellyPlus1PmUl extends ShellyPlus1Pm {
-  static readonly model: string = "SNSW-001P15UL";
+    static readonly model: string = 'SNSW-001P15UL';
 }
 
 Device.registerClass(ShellyPlus1PmUl);
 
 export class ShellyPlus1PmMini extends ShellyPlus1Pm {
-  static readonly model: string = "SNSW-001P8EU";
-  static readonly modelName: string = "Shelly Plus 1 PM Mini";
+    static readonly model: string = 'SNSW-001P8EU';
+    static readonly modelName: string = 'Shelly Plus 1 PM Mini';
 }
 
 Device.registerClass(ShellyPlus1PmMini);
 
 export class ShellyPlus1PmMiniV3 extends ShellyPlus1Pm {
-  static readonly model: string = "S3SW-001P8EU";
-  static readonly modelName: string = "Shelly Plus 1 PM Mini";
+    static readonly model: string = 'S3SW-001P8EU';
+    static readonly modelName: string = 'Shelly Plus 1 PM Mini';
 }
 
 Device.registerClass(ShellyPlus1PmMiniV3);
 
 export class ShellyPlus1PmV3 extends ShellyPlus1Pm {
-  static readonly model: string = "S3SW-001P16EU";
+    static readonly model: string = 'S3SW-001P16EU';
 }
 
 Device.registerClass(ShellyPlus1PmV3);
