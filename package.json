@@ -1,5 +1,5 @@
 {
-    "name": "shellies-ds9",
+    "name": "@lucavb/shellies-ds9",
     "version": "1.1.9",
     "description": "Handles communication with the next generation of Shelly devices",
     "main": "dist/index.js",
@@ -22,21 +22,25 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/cubi1337/node-shellies-ds9.git"
+        "url": "git+https://github.com/lucavb/node-shellies-ds9.git"
     },
     "keywords": [
         "shelly"
     ],
-    "author": "Alexander Rydén/ David S.",
+    "authors": [
+        "Alexander Rydén",
+        "David S.",
+        {
+            "name": "Luca Becker",
+            "email": "hello@luca-becker.me",
+            "url": "https://luca-becker.me"
+        }
+    ],
     "license": "GPL-3.0",
     "bugs": {
-        "url": "https://github.com/cubi1337/node-shellies-ds9/issues"
+        "url": "https://github.com/lucavb/node-shellies-ds9/issues"
     },
-    "homepage": "https://github.com/cubi1337/node-shellies-ds9#readme",
-    "funding": {
-        "type": "kofi",
-        "url": "https://ko-fi.com/cubi1337"
-    },
+    "homepage": "https://github.com/lucavb/node-shellies-ds9#readme",
     "devDependencies": {
         "@eslint/js": "9.29.0",
         "@types/jest": "^29.5.11",
