@@ -3,7 +3,23 @@
     "version": "1.1.9",
     "description": "Handles communication with the next generation of Shelly devices",
     "keywords": [
-        "shelly"
+        "shelly",
+        "shellies",
+        "iot",
+        "smart-home",
+        "home-automation",
+        "websocket",
+        "rpc",
+        "device-control",
+        "allterco",
+        "mqtt",
+        "automation",
+        "smart-switch",
+        "smart-plug",
+        "dimmer",
+        "relay",
+        "esp32",
+        "home-assistant"
     ],
     "homepage": "https://github.com/lucavb/node-shellies-ds9#readme",
     "bugs": {
