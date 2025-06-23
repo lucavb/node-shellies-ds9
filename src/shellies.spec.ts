@@ -8,8 +8,8 @@ class TestRpcHandler extends RpcHandler {
     }
 
     connected = true;
-    request = jest.fn().mockResolvedValue({ success: true });
-    destroy = jest.fn().mockImplementation(() => Promise.resolve());
+    request = vi.fn().mockResolvedValue({ success: true });
+    destroy = vi.fn().mockImplementation(() => Promise.resolve());
 }
 
 class TestDevice extends Device {
@@ -51,7 +51,7 @@ describe('Shellies', () => {
         });
 
         test('emits an `add` event', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             shellies.on('add', listener);
 
             const device = new TestDevice('abc123');
@@ -101,7 +101,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             shellies.forEach(callback);
 
@@ -133,7 +133,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             for (const [id, device] of shellies.entries()) {
                 callback(id, device);
@@ -156,7 +156,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             for (const id of shellies.keys()) {
                 callback(id);
@@ -179,7 +179,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             for (const device of shellies.values()) {
                 callback(device);
@@ -202,7 +202,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             for (const device of shellies) {
                 callback(device);
@@ -237,7 +237,7 @@ describe('Shellies', () => {
 
             shellies.add(device);
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             shellies.on('remove', listener);
 
             shellies.delete(device);
@@ -251,7 +251,7 @@ describe('Shellies', () => {
         });
 
         test('emits no `remove` event for unknown devices', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             shellies.on('remove', listener);
 
             shellies.delete('abc123');
@@ -280,7 +280,7 @@ describe('Shellies', () => {
             shellies.add(device2);
             shellies.add(device3);
 
-            const listener = jest.fn();
+            const listener = vi.fn();
             shellies.on('remove', listener);
 
             shellies.clear();

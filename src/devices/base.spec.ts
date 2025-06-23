@@ -8,8 +8,8 @@ class TestRpcHandler extends RpcHandler {
     }
 
     connected = true;
-    request = jest.fn().mockResolvedValue({ success: true });
-    destroy = jest.fn().mockImplementation(() => Promise.resolve());
+    request = vi.fn().mockResolvedValue({ success: true });
+    destroy = vi.fn().mockImplementation(() => Promise.resolve());
 }
 
 class TestComponent extends Component<unknown, null, null> {
@@ -83,7 +83,7 @@ describe('Device', () => {
 
     describe('.[Symbol.iterator]()', () => {
         test('returns a valid iterator', () => {
-            const callback = jest.fn();
+            const callback = vi.fn();
 
             for (const [name, component] of device) {
                 callback(name, component);

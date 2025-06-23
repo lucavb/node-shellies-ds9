@@ -17,8 +17,8 @@ class TestRpcHandler extends RpcHandler {
     }
 
     connected = true;
-    request = jest.fn().mockResolvedValue({ success: true });
-    destroy = jest.fn().mockImplementation(() => Promise.resolve());
+    request = vi.fn().mockResolvedValue({ success: true });
+    destroy = vi.fn().mockImplementation(() => Promise.resolve());
 }
 
 class TestDevice extends Device {
@@ -109,7 +109,7 @@ describe('Component', () => {
         });
 
         test('emits `change` events', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             component.on('change', listener);
 
             component.update({
@@ -127,7 +127,7 @@ describe('Component', () => {
         });
 
         test('ignores omitted characteristics', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             component.on('change', listener);
 
             component.update({
@@ -140,7 +140,7 @@ describe('Component', () => {
         });
 
         test('ignores unchanged compound characteristics', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             component.on('change', listener);
 
             component.update({
@@ -154,7 +154,7 @@ describe('Component', () => {
         });
 
         test('ignores unknown attributes', () => {
-            const listener = jest.fn();
+            const listener = vi.fn();
             component.on('change', listener);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -172,8 +172,8 @@ describe('Component', () => {
     });
 
     describe('.rpc()', () => {
-        test('makes a request', () => {
-            expect(component.makeRequest(1)).resolves.toStrictEqual({ success: true });
+        test('makes a request', async () => {
+            await expect(component.makeRequest(1)).resolves.toStrictEqual({ success: true });
 
             expect(device.rpcHandler.request).toHaveBeenCalledWith('Test.Request', { id: 1 });
         });

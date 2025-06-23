@@ -10,8 +10,8 @@ class TestRpcHandler extends RpcHandler {
     }
 
     connected = true;
-    request = jest.fn().mockResolvedValue({ success: true });
-    destroy = jest.fn().mockImplementation(() => Promise.resolve());
+    request = vi.fn().mockResolvedValue({ success: true });
+    destroy = vi.fn().mockImplementation(() => Promise.resolve());
 }
 
 class TestDevice extends Device {
