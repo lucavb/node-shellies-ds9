@@ -1,7 +1,6 @@
 import { Component } from './base';
 import { Device } from '../devices';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UiAttributes {}
 
 export interface UiConfig {

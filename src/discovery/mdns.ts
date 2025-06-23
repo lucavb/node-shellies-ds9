@@ -120,6 +120,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
      */
     protected waitUntilReady(): Promise<void> {
         return new Promise((resolve) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.mdns!.once('ready', resolve);
         });
     }
@@ -129,6 +130,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
      */
     protected sendQuery(): Promise<void> {
         return new Promise((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.mdns!.query(SERVICE_NAME, 'PTR', (error: Error | null) => {
                 if (error !== null) {
                     reject(error);
@@ -157,6 +159,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
      */
     protected destroy(): Promise<void> {
         return new Promise((resolve) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.mdns!.destroy(resolve);
         });
     }

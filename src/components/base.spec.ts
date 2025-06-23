@@ -78,9 +78,13 @@ describe('Component', () => {
         test('has the defined characteristics', () => {
             const cs = component.getCharacteristics();
 
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             expect(cs!.size).toBe(3);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             expect(cs!.has('characteristic1')).toBe(true);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             expect(cs!.has('characteristic2')).toBe(true);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             expect(cs!.has('characteristic3')).toBe(true);
         });
     });
