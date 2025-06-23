@@ -16,7 +16,6 @@
         "cq:prettier:fix": "prettier --write \"src/**/*.{ts,js,json}\"",
         "cq:tsc": "tsc --noEmit",
         "postversion": "git push && git push --tags",
-        "pretty": "prettier --write \"./**/*.{js,jsx,json}\"",
         "preversion": "npm run build && npm run cq:eslint && npm test",
         "test": "jest"
     },
