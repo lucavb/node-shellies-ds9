@@ -17,6 +17,10 @@ import {
     InputConfig,
     LightAttributes,
     LightConfig,
+    RgbAttributes,
+    RgbConfig,
+    RgbwAttributes,
+    RgbwConfig,
     MqttAttributes,
     MqttConfig,
     OutboundWebSocketAttributes,
@@ -53,6 +57,11 @@ export interface ShellyStatus {
     'switch:2'?: SwitchAttributes;
     'switch:3'?: SwitchAttributes;
     'light:0'?: LightAttributes;
+    'light:1'?: LightAttributes;
+    'light:2'?: LightAttributes;
+    'light:3'?: LightAttributes;
+    'rgb:0'?: RgbAttributes;
+    'rgbw:0'?: RgbwAttributes;
     'devicepower:0'?: DevicePowerAttributes;
     'humidity:0'?: HumidityAttributes;
     'temperature:0'?: TemperatureAttributes;
@@ -77,6 +86,11 @@ export interface ShellyConfig {
     'switch:2'?: SwitchConfig;
     'switch:3'?: SwitchConfig;
     'light:0'?: LightConfig;
+    'light:1'?: LightConfig;
+    'light:2'?: LightConfig;
+    'light:3'?: LightConfig;
+    'rgb:0'?: RgbConfig;
+    'rgbw:0'?: RgbwConfig;
     'devicepower:0'?: DevicePowerConfig;
     'humidity:0'?: HumidityConfig;
     'temperature:0'?: TemperatureConfig;

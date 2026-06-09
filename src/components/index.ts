@@ -8,6 +8,8 @@ export * from './ht-ui';
 export * from './humidity';
 export * from './input';
 export * from './light';
+export * from './rgb';
+export * from './rgbw';
 export * from './mqtt';
 export * from './outbound-websocket';
 export * from './script';

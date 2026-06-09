@@ -1,69 +1,62 @@
 import { characteristic, ComponentWithId } from './base';
 import { Device } from '../devices';
-import { SwitchEnergyCounterAttributes } from './switch';
+import { SwitchEnergyCounterAttributes, SwitchTemperatureAttributes } from './switch';
 
-export interface LightAttributes {
+export interface RgbAttributes {
     id: number;
     source: string;
     output: boolean;
     brightness: number;
+    rgb: number[];
     timer_started_at?: number;
     timer_duration?: number;
     apower?: number;
     voltage?: number;
     current?: number;
     aenergy?: SwitchEnergyCounterAttributes;
+    temperature?: SwitchTemperatureAttributes;
+    errors?: string[];
 }
 
-export interface LightConfig {
+export interface RgbConfig {
     id: number;
     name: string | null;
-    initial_state: 'off' | 'on' | 'restore_last' | 'match_input';
+    in_mode: string;
+    initial_state: 'off' | 'on' | 'restore_last';
     auto_on: boolean;
     auto_on_delay: number;
     auto_off: boolean;
     auto_off_delay: number;
-    default: {
-        brightness: number;
-    };
+    transition_duration: number;
+    min_brightness_on_toggle: number;
     night_mode: {
         enable: boolean;
-        brightness: number;
+        brightness: number | null;
+        rgb: number[] | null;
         active_between?: string[];
     };
+    button_fade_rate: number;
 }
 
 /**
- * Handles a dimmable light output with additional on/off control.
+ * Handles an RGB LED output with color and brightness control.
  */
-export class Light extends ComponentWithId<LightAttributes, LightConfig> implements LightAttributes {
-    /**
-     * Source of the last command.
-     */
+export class Rgb extends ComponentWithId<RgbAttributes, RgbConfig> implements RgbAttributes {
     @characteristic
     readonly source: string = '';
 
-    /**
-     * true if the output channel is currently on, false otherwise.
-     */
     @characteristic
     readonly output: boolean = false;
 
-    /**
-     * Current brightness level, in percent.
-     */
     @characteristic
     readonly brightness: number = 0;
 
-    /**
-     * Start time of the timer (as a UNIX timestamp, in UTC).
-     */
+    @characteristic
+    readonly rgb: number[] = [0, 0, 0];
+
     @characteristic
     readonly timer_started_at: number | undefined;
 
-    /**
-     * Duration of the timer, in seconds.
-     */
     @characteristic
     readonly timer_duration: number | undefined;
 
@@ -79,31 +72,28 @@ export class Light extends ComponentWithId<LightAttributes, LightConfig> impleme
     @characteristic
     readonly aenergy: SwitchEnergyCounterAttributes | undefined;
 
+    @characteristic
+    readonly temperature: SwitchTemperatureAttributes | undefined;
+
+    @characteristic
+    readonly errors: string[] | undefined;
+
     constructor(device: Device, id = 0) {
-        super('Light', device, id);
+        super('RGB', device, id);
     }
 
-    /**
-     * Toggles the output state.
-     */
     toggle(): PromiseLike<null> {
         return this.rpc<null>('Toggle', {
             id: this.id,
         });
     }
 
-    /**
-     * Sets the output and brightness level of the light.
-     * At least one of `on` and `brightness` must be specified.
-     * @param on - Whether to switch on or off.
-     * @param brightness - Brightness level.
-     * @param toggle_after - Flip-back timer, in seconds.
-     */
-    set(on?: boolean, brightness?: number, toggle_after?: number): PromiseLike<null> {
+    set(on?: boolean, brightness?: number, rgb?: number[], toggle_after?: number): PromiseLike<null> {
         return this.rpc<null>('Set', {
             id: this.id,
             on,
             brightness,
+            rgb,
             toggle_after,
         });
     }
