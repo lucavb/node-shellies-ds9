@@ -56,11 +56,12 @@
         "cq:prettier": "prettier --check \"src/**/*.{ts,js,json}\"",
         "cq:prettier:fix": "prettier --write \"src/**/*.{ts,js,json}\"",
         "cq:tsc": "tsc --noEmit",
+        "commitlint": "commitlint --edit",
+        "release": "semantic-release",
+        "release:dry-run": "semantic-release --dry-run",
         "test": "vitest run",
         "test:ui": "vitest --ui",
-        "test:watch": "vitest",
-        "preversion": "npm run build && npm run cq:eslint && npm test",
-        "postversion": "git push && git push --tags"
+        "test:watch": "vitest"
     },
     "dependencies": {
         "eventemitter3": "5.0.1",
@@ -70,7 +71,14 @@
         "ws": "8.18.2"
     },
     "devDependencies": {
+        "@commitlint/cli": "21.0.2",
+        "@commitlint/config-conventional": "21.0.2",
+        "@commitlint/types": "21.0.1",
         "@eslint/js": "9.29.0",
+        "@semantic-release/commit-analyzer": "13.0.1",
+        "@semantic-release/github": "12.0.8",
+        "@semantic-release/npm": "13.1.5",
+        "@semantic-release/release-notes-generator": "14.1.1",
         "@types/multicast-dns": "7.2.4",
         "@types/node": "24.0.3",
         "@vitest/ui": "3.2.4",
@@ -78,13 +86,16 @@
         "jiti": "2.4.2",
         "prettier": "3.6.0",
         "rimraf": "6.0.1",
+        "semantic-release": "25.0.3",
         "tsup": "8.5.0",
         "typescript": "5.8.3",
         "typescript-eslint": "8.34.1",
         "vitest": "3.2.4"
     },
     "publishConfig": {
-        "access": "public"
+        "access": "public",
+        "registry": "https://registry.npmjs.org/",
+        "provenance": true
     },
     "authors": [
         "Alexander Rydén",
