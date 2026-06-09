@@ -72,3 +72,9 @@ export class ShellyPro4PmV2 extends ShellyPro4Pm {
 }
 
 Device.registerClass(ShellyPro4PmV2);
+
+export class ShellyPro4PmV3 extends ShellyPro4PmV2 {
+    static readonly model: string = 'SPSW-204PE16EU';
+}
+
+Device.registerClass(ShellyPro4PmV3);
