@@ -41,10 +41,6 @@ export class GenericDevice extends Device {
         return device;
     }
 
-    constructor(info: DeviceInfo, rpcHandler: RpcHandler) {
-        super(info, rpcHandler);
-    }
-
     /**
      * A human-friendly name of the device model.
      */

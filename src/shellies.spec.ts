@@ -352,10 +352,15 @@ describe('Shellies', () => {
             discoverer.discover({ deviceId: 'abc123', hostname: '192.168.1.10' });
             await vi.waitFor(() => expect(addListener).toHaveBeenCalledTimes(1));
 
-            expect(unknownListener).toHaveBeenCalledWith('abc123', 'UNKNOWN-MODEL', {
-                deviceId: 'abc123',
-                hostname: '192.168.1.10',
-            }, true);
+            expect(unknownListener).toHaveBeenCalledWith(
+                'abc123',
+                'UNKNOWN-MODEL',
+                {
+                    deviceId: 'abc123',
+                    hostname: '192.168.1.10',
+                },
+                true,
+            );
             expect(addListener.mock.calls[0][0]).toBeInstanceOf(GenericDevice);
             expect(shellies.has('abc123')).toBe(true);
         });
@@ -414,10 +419,15 @@ describe('Shellies', () => {
             discoverer.discover({ deviceId: 'abc123', hostname: '192.168.1.10' });
             await vi.waitFor(() => expect(unknownListener).toHaveBeenCalledTimes(1));
 
-            expect(unknownListener).toHaveBeenCalledWith('abc123', 'UNKNOWN-MODEL', {
-                deviceId: 'abc123',
-                hostname: '192.168.1.10',
-            }, false);
+            expect(unknownListener).toHaveBeenCalledWith(
+                'abc123',
+                'UNKNOWN-MODEL',
+                {
+                    deviceId: 'abc123',
+                    hostname: '192.168.1.10',
+                },
+                false,
+            );
             expect(addListener).not.toHaveBeenCalled();
             expect(shellies.has('abc123')).toBe(false);
         });

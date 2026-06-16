@@ -36,7 +36,10 @@ function createFunctionalComponent(device: Device, parsed: Extract<ParsedCompone
     }
 }
 
-function createServiceComponent(device: Device, parsed: Extract<ParsedComponentKey, { kind: 'service' }>): ComponentLike {
+function createServiceComponent(
+    device: Device,
+    parsed: Extract<ParsedComponentKey, { kind: 'service' }>,
+): ComponentLike {
     switch (parsed.key) {
         case 'wifi':
             return new WiFi(device);

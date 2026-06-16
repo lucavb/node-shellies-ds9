@@ -76,7 +76,65 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Plug US Gen4](https://kb.shelly.cloud/knowledge-base/shelly-plug-us-gen4)
 - [Shelly Power Strip 4 Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyPowerStripG4/)
 
-<sup>1</sup> Support for outbound websockets is a work in progress.
+## Outbound WebSocket server
+
+Devices can dial into your Node process instead of requiring inbound LAN access — useful for NAT, battery-powered devices, and fleets.
+
+Install the server entry point separately from the main client API:
+
+```typescript
+import { ShellyOutboundServer } from '@lucavb/shellies-ds9/server';
+
+const server = new ShellyOutboundServer({ port: 7011, path: '/shelly' });
+
+server.on('device', async (device) => {
+    console.log(`Device connected: ${device.id} (${device.modelName})`);
+    await device.switch0.toggle();
+});
+
+server.on('disconnect', (deviceId, code, reason) => {
+    console.log(`Device disconnected: ${deviceId} (${code}: ${reason})`);
+});
+
+await server.listen();
+```
+
+Configure a Shelly device to connect outbound (via inbound RPC or the device web UI):
+
+```typescript
+await device.outboundWebSocket.setConfig({
+    enable: true,
+    server: 'ws://your-server:7011/shelly', // or wss:// for TLS
+    ssl_ca: '*', // use 'user_ca.pem' + upload CA for self-signed TLS
+});
+// Ws.SetConfig returns restart_required: true — reboot the device after saving
+```
+
+TLS example:
+
+```typescript
+import fs from 'fs';
+import { ShellyOutboundServer } from '@lucavb/shellies-ds9/server';
+
+const server = new ShellyOutboundServer({
+    port: 7011,
+    path: '/shelly',
+    tls: {
+        cert: fs.readFileSync('cert.pem'),
+        key: fs.readFileSync('key.pem'),
+    },
+});
+```
+
+Common server URLs:
+
+| Deployment                  | URL                            |
+| --------------------------- | ------------------------------ |
+| This library (default path) | `ws://host:7011/rpc`           |
+| Shelly Fleet Manager style  | `ws://host:7011/shelly`        |
+| Home Assistant style        | `ws://host:8123/api/shelly/ws` |
+
+When a device reconnects, the server emits `disconnect` then a new `device` event with a fresh `Device` instance.
 
 ## Basic usage example
 
@@ -119,12 +177,7 @@ See [homebridge-shelly-ng]() for a real-world example.
 By default, unrecognized model strings are ignored and an `unknown` event is emitted. You can opt in to **generic device** support so Gen2+ hardware is discovered and controlled without a typed device class:
 
 ```typescript
-import {
-    GenericDevice,
-    isGenericDevice,
-    MdnsDeviceDiscoverer,
-    Shellies,
-} from '@lucavb/shellies-ds9';
+import { GenericDevice, isGenericDevice, MdnsDeviceDiscoverer, Shellies } from '@lucavb/shellies-ds9';
 
 const shellies = new Shellies({ genericDevices: true });
 

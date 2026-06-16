@@ -4,11 +4,7 @@ import type { Light } from './light';
 import type { Switch } from './switch';
 
 /** Known functional component keys from Shelly status/config payloads */
-export type FunctionalComponentKey =
-    | `switch:${number}`
-    | `cover:${number}`
-    | `light:${number}`
-    | `input:${number}`;
+export type FunctionalComponentKey = `switch:${number}` | `cover:${number}` | `light:${number}` | `input:${number}`;
 
 export type ServiceComponentKey =
     | 'sys'
@@ -45,9 +41,7 @@ export function parseFunctionalComponentId(key: FunctionalComponentKey): number 
     return Number(key.slice(colonIndex + 1));
 }
 
-export function parseFunctionalComponentType(
-    key: FunctionalComponentKey,
-): 'switch' | 'cover' | 'light' | 'input' {
+export function parseFunctionalComponentType(key: FunctionalComponentKey): 'switch' | 'cover' | 'light' | 'input' {
     const colonIndex = key.indexOf(':');
     return key.slice(0, colonIndex) as 'switch' | 'cover' | 'light' | 'input';
 }

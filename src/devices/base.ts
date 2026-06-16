@@ -287,7 +287,11 @@ export abstract class Device extends EventEmitter {
 
         // update the components
         for (const cmpnt in status) {
-            if (Object.prototype.hasOwnProperty.call(status, cmpnt) && typeof status[cmpnt] === 'object') {
+            if (
+                Object.prototype.hasOwnProperty.call(status, cmpnt) &&
+                status[cmpnt] !== null &&
+                typeof status[cmpnt] === 'object'
+            ) {
                 this.getComponent(cmpnt)?.update(status[cmpnt] as Record<string, unknown>);
             }
         }
@@ -320,6 +324,7 @@ export abstract class Device extends EventEmitter {
             if (
                 cmpnt !== 'ts' &&
                 Object.prototype.hasOwnProperty.call(update, cmpnt) &&
+                update[cmpnt] !== null &&
                 typeof update[cmpnt] === 'object'
             ) {
                 this.getComponent(cmpnt)?.update(update[cmpnt] as Record<string, unknown>);

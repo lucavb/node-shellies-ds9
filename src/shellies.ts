@@ -2,6 +2,7 @@ import EventEmitter from 'eventemitter3';
 
 import { Device, DeviceId, GenericDevice } from './devices';
 import { DeviceDiscoverer, DeviceIdentifiers } from './discovery';
+import { createDeviceFromInfo } from './internal/create-device';
 import { RpcHandler, WebSocketRpcHandlerFactory, WebSocketRpcHandlerOptions } from './rpc';
 import { ShellyDeviceInfo } from './services';
 
@@ -370,28 +371,24 @@ export class Shellies extends EventEmitter<ShelliesEvents> {
                 throw new Error(`Unexpected device ID (returned: ${info.id}, expected: ${deviceId})`);
             }
 
-            // get the device class for this model
-            const cls = Device.getClass(info.model ?? '');
+            const willAddGeneric =
+                this.options.genericDevices && info.gen >= 2 && Device.getClass(info.model ?? '') === undefined;
 
-            let device: Device;
-
-            if (cls !== undefined) {
-                device = new cls(info, rpcHandler);
-            } else if (this.options.genericDevices && info.gen >= 2) {
+            if (willAddGeneric) {
                 this.emit('unknown', deviceId, info.model, identifiers, true);
-                device = await GenericDevice.create(info, rpcHandler);
-            } else {
+            }
+
+            const device = await createDeviceFromInfo(info, rpcHandler, {
+                autoLoadStatus: this.options.autoLoadStatus,
+                autoLoadConfig: this.options.autoLoadConfig,
+                genericDevices: this.options.genericDevices,
+            });
+
+            if (device === null) {
                 this.ignoredDevices.add(deviceId);
                 this.emit('unknown', deviceId, info.model, identifiers, false);
                 this.pendingDevices.delete(deviceId);
                 return;
-            }
-
-            if (this.options.autoLoadStatus === true) {
-                await device.loadStatus();
-            }
-            if (this.options.autoLoadConfig === true) {
-                await device.loadConfig();
             }
 
             this.pendingDevices.delete(deviceId);
