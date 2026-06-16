@@ -13,6 +13,8 @@ import {
     ShellyPlugPmG3Eu,
     ShellyPlugUsG4,
     ShellyPlusI4Dc,
+    ShellyPowerStrip4G4,
+    ShellyPowerStrip4G4Black,
 } from './index';
 
 test('S4SW-001X16EU resolves to ShellyGen4One', () => {
@@ -45,6 +47,14 @@ test('S4SW-002P16ANZ resolves to ShellyGen42PmAnz', () => {
 
 test('S4PL-00116US resolves to ShellyPlugUsG4', () => {
     expect(Device.getClass('S4PL-00116US')).toBe(ShellyPlugUsG4);
+});
+
+test('S4PL-00416EU resolves to ShellyPowerStrip4G4', () => {
+    expect(Device.getClass('S4PL-00416EU')).toBe(ShellyPowerStrip4G4);
+});
+
+test('S4PL-10416EU resolves to ShellyPowerStrip4G4Black', () => {
+    expect(Device.getClass('S4PL-10416EU')).toBe(ShellyPowerStrip4G4Black);
 });
 
 test('S3PL-10112EU resolves to ShellyPlugAzG3Eu', () => {

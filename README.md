@@ -72,6 +72,7 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly 1 Mini Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyMini1G4)
 - [Shelly 1 PM Mini Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyMini1PMG4/)
 - [Shelly Plug US Gen4](https://kb.shelly.cloud/knowledge-base/shelly-plug-us-gen4)
+- [Shelly Power Strip 4 Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyPowerStripG4/)
 
 <sup>1</sup> Support for outbound websockets is a work in progress.
 

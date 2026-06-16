@@ -22,3 +22,4 @@ export * from './shelly-plus-dimmer';
 export * from './shelly-gen3-2-pm';
 export * from './shelly-gen4-1-pm';
 export * from './shelly-gen4-2-pm';
+export * from './shelly-gen4-power-strip-4';
