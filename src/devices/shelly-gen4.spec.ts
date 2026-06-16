@@ -1,5 +1,6 @@
 import {
     Device,
+    Shelly1LGen3,
     ShellyGen4One,
     ShellyGen4OneAnz,
     ShellyGen4OneMini,
@@ -16,6 +17,10 @@ import {
     ShellyPowerStrip4G4,
     ShellyPowerStrip4G4Black,
 } from './index';
+
+test('S3SW-0A1X1EUL resolves to Shelly1LGen3', () => {
+    expect(Device.getClass('S3SW-0A1X1EUL')).toBe(Shelly1LGen3);
+});
 
 test('S4SW-001X16EU resolves to ShellyGen4One', () => {
     expect(Device.getClass('S4SW-001X16EU')).toBe(ShellyGen4One);

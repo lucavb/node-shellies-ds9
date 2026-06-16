@@ -16,6 +16,7 @@ The [imuab repository](https://github.com/imuab/node-shellies-ds9) had a pull re
 - Shelly Plus 1 PM Mini
 - Shelly Plus PM Mini
 - Shelly Plug S Gen 3 EU
+- Shelly 1L Gen3
 
 This fork is specifically maintained for Homebridge compatibility where these devices are essential.
 
@@ -32,6 +33,7 @@ Handles communication with the next generation of Shelly devices.
 ## Supported devices
 
 - [Shelly Plus 1 + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1)
+- [Shelly 1L Gen3](https://kb.shelly.cloud/knowledge-base/shelly-1l-gen3)
 - [Shelly Plus 1 PM + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1PM)
 - [Shelly Plus 1 Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1)
 - [Shelly Plus 1 PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1PM)
