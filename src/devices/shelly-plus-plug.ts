@@ -56,3 +56,38 @@ export class ShellyPlugSG3Eu extends ShellyPlusPlugUs {
 }
 
 Device.registerClass(ShellyPlugSG3Eu);
+
+export class ShellyPlugAzG3Eu extends ShellyPlugSG3Eu {
+    static readonly model: string = 'S3PL-10112EU';
+    static readonly modelName: string = 'Shelly AZ Plug Gen3';
+}
+
+Device.registerClass(ShellyPlugAzG3Eu);
+
+export class ShellyOutdoorPlugSG3Eu extends ShellyPlugSG3Eu {
+    static readonly model: string = 'S3PL-20112EU';
+    static readonly modelName: string = 'Shelly Outdoor Plug S Gen3';
+}
+
+Device.registerClass(ShellyOutdoorPlugSG3Eu);
+
+export class ShellyPlugMG3Eu extends ShellyPlugSG3Eu {
+    static readonly model: string = 'S3PL-30110EU';
+    static readonly modelName: string = 'Shelly Plug M Gen3';
+}
+
+Device.registerClass(ShellyPlugMG3Eu);
+
+export class ShellyPlugPmG3Eu extends ShellyPlugSG3Eu {
+    static readonly model: string = 'S3PL-30116EU';
+    static readonly modelName: string = 'Shelly Plug PM Gen3';
+}
+
+Device.registerClass(ShellyPlugPmG3Eu);
+
+export class ShellyPlugUsG4 extends ShellyPlusPlugUs {
+    static readonly model: string = 'S4PL-00116US';
+    static readonly modelName: string = 'Shelly Plug US Gen4';
+}
+
+Device.registerClass(ShellyPlugUsG4);

@@ -43,3 +43,10 @@ export class ShellyPlusI4V3 extends ShellyPlusI4 {
 }
 
 Device.registerClass(ShellyPlusI4V3);
+
+export class ShellyPlusI4Dc extends ShellyPlusI4 {
+    static readonly model: string = 'SNSN-0D24X';
+    static readonly modelName: string = 'Shelly Plus I4 DC';
+}
+
+Device.registerClass(ShellyPlusI4Dc);

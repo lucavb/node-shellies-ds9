@@ -1,0 +1,53 @@
+import {
+    Device,
+    ShellyGen4One,
+    ShellyGen4OneMini,
+    ShellyGen4OnePm,
+    ShellyGen42Pm,
+    ShellyOutdoorPlugSG3Eu,
+    ShellyPlugAzG3Eu,
+    ShellyPlugMG3Eu,
+    ShellyPlugPmG3Eu,
+    ShellyPlugUsG4,
+    ShellyPlusI4Dc,
+} from './index';
+
+test('S4SW-001X16EU resolves to ShellyGen4One', () => {
+    expect(Device.getClass('S4SW-001X16EU')).toBe(ShellyGen4One);
+});
+
+test('S4SW-001P16EU resolves to ShellyGen4OnePm', () => {
+    expect(Device.getClass('S4SW-001P16EU')).toBe(ShellyGen4OnePm);
+});
+
+test('S4SW-001X8EU resolves to ShellyGen4OneMini', () => {
+    expect(Device.getClass('S4SW-001X8EU')).toBe(ShellyGen4OneMini);
+});
+
+test('S4SW-002P16EU resolves to ShellyGen42Pm', () => {
+    expect(Device.getClass('S4SW-002P16EU')).toBe(ShellyGen42Pm);
+});
+
+test('S4PL-00116US resolves to ShellyPlugUsG4', () => {
+    expect(Device.getClass('S4PL-00116US')).toBe(ShellyPlugUsG4);
+});
+
+test('S3PL-10112EU resolves to ShellyPlugAzG3Eu', () => {
+    expect(Device.getClass('S3PL-10112EU')).toBe(ShellyPlugAzG3Eu);
+});
+
+test('S3PL-20112EU resolves to ShellyOutdoorPlugSG3Eu', () => {
+    expect(Device.getClass('S3PL-20112EU')).toBe(ShellyOutdoorPlugSG3Eu);
+});
+
+test('S3PL-30110EU resolves to ShellyPlugMG3Eu', () => {
+    expect(Device.getClass('S3PL-30110EU')).toBe(ShellyPlugMG3Eu);
+});
+
+test('S3PL-30116EU resolves to ShellyPlugPmG3Eu', () => {
+    expect(Device.getClass('S3PL-30116EU')).toBe(ShellyPlugPmG3Eu);
+});
+
+test('SNSN-0D24X resolves to ShellyPlusI4Dc', () => {
+    expect(Device.getClass('SNSN-0D24X')).toBe(ShellyPlusI4Dc);
+});

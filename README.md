@@ -37,7 +37,9 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Plus 1 PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1PM)
 - [Shelly Plus PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPMMini)
 - [Shelly Plus 2 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus2PM)
+- [Shelly 2PM Gen3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/Shelly2PMG3)
 - [Shelly Plus I4 +V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusI4)
+- [Shelly Plus I4 DC](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusI4DC)
 - [Shelly Plus Plug S](https://kb.shelly.cloud/knowledge-base/shelly-plus-plug-s-1)
 - [Shelly Plus Plug US](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlugUS)
 - [Shelly Plus Plug UK](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPlugUK)
@@ -45,6 +47,10 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Plus H&T +V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusHT)
 - [Shelly Plus 0-10V Dimmer](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus10V)
 - [Shelly Plug S Gen3 EU](https://kb.shelly.cloud/knowledge-base/shelly-plug-s-mtr-gen3)
+- [Shelly AZ Plug Gen3](https://kb.shelly.cloud/knowledge-base/shelly-az-plug-gen3)
+- [Shelly Outdoor Plug S Gen3](https://kb.shelly.cloud/knowledge-base/shelly-outdoor-plug-s-gen3)
+- [Shelly Plug M Gen3](https://kb.shelly.cloud/knowledge-base/shelly-plug-m-gen3)
+- [Shelly Plug PM Gen3](https://kb.shelly.cloud/knowledge-base/shelly-plug-pm-gen3)
 - [Shelly Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmer0110VPMG3)
 - [Shelly Dimmer](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyDimmerG3)
 - [Shelly Pro 1](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro1)
@@ -57,7 +63,12 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Pro Dimmer 1PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer1PM)
 - [Shelly Pro Dimmer 0/1-10V PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer0110VPM)
 - [Shelly Pro Dimmer 2PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer2PM)
+- [Shelly 1 Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/Shelly1G4)
+- [Shelly 1PM Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/Shelly1PMG4)
+- [Shelly 2PM Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/Shelly2PMG4)
+- [Shelly 1 Mini Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyMini1G4)
 - [Shelly 1 PM Mini Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyMini1PMG4/)
+- [Shelly Plug US Gen4](https://kb.shelly.cloud/knowledge-base/shelly-plug-us-gen4)
 
 <sup>1</sup> Support for outbound websockets is a work in progress.
 
