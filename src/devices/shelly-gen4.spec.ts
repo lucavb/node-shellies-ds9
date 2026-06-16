@@ -1,9 +1,12 @@
 import {
     Device,
     ShellyGen4One,
+    ShellyGen4OneAnz,
     ShellyGen4OneMini,
     ShellyGen4OnePm,
+    ShellyGen4OnePmAnz,
     ShellyGen42Pm,
+    ShellyGen42PmAnz,
     ShellyOutdoorPlugSG3Eu,
     ShellyPlugAzG3Eu,
     ShellyPlugMG3Eu,
@@ -26,6 +29,18 @@ test('S4SW-001X8EU resolves to ShellyGen4OneMini', () => {
 
 test('S4SW-002P16EU resolves to ShellyGen42Pm', () => {
     expect(Device.getClass('S4SW-002P16EU')).toBe(ShellyGen42Pm);
+});
+
+test('S4SW-001X16ANZ resolves to ShellyGen4OneAnz', () => {
+    expect(Device.getClass('S4SW-001X16ANZ')).toBe(ShellyGen4OneAnz);
+});
+
+test('S4SW-001P16ANZ resolves to ShellyGen4OnePmAnz', () => {
+    expect(Device.getClass('S4SW-001P16ANZ')).toBe(ShellyGen4OnePmAnz);
+});
+
+test('S4SW-002P16ANZ resolves to ShellyGen42PmAnz', () => {
+    expect(Device.getClass('S4SW-002P16ANZ')).toBe(ShellyGen42PmAnz);
 });
 
 test('S4PL-00116US resolves to ShellyPlugUsG4', () => {

@@ -54,3 +54,17 @@ export class ShellyGen4Mini extends MultiProfileDevice {
 }
 
 Device.registerClass(ShellyGen4Mini);
+
+export class ShellyGen4OneAnz extends ShellyGen4One {
+    static readonly model: string = 'S4SW-001X16ANZ';
+    static readonly modelName: string = 'Shelly 1 Gen4 ANZ';
+}
+
+Device.registerClass(ShellyGen4OneAnz);
+
+export class ShellyGen4OnePmAnz extends ShellyGen4OnePm {
+    static readonly model: string = 'S4SW-001P16ANZ';
+    static readonly modelName: string = 'Shelly 1PM Gen4 ANZ';
+}
+
+Device.registerClass(ShellyGen4OnePmAnz);
