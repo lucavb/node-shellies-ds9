@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-import { Device, DeviceId } from './devices';
+import { Device, DeviceId, GenericDevice } from './devices';
 import { DeviceDiscoverer, DeviceIdentifiers } from './discovery';
 import { RpcHandler, WebSocketRpcHandlerFactory, WebSocketRpcHandlerOptions } from './rpc';
 import { ShellyDeviceInfo } from './services';
@@ -58,6 +58,10 @@ export interface ShelliesOptions {
      * Configuration options for devices.
      */
     deviceOptions: Map<DeviceId, Partial<DeviceOptions>> | DeviceOptionsCallback | null;
+    /**
+     * Whether unrecognized Gen2+ models should be added as generic devices.
+     */
+    genericDevices: boolean;
 }
 
 /**
@@ -67,6 +71,7 @@ const DEFAULT_SHELLIES_OPTIONS: Readonly<ShelliesOptions> = {
     autoLoadStatus: true,
     autoLoadConfig: false,
     deviceOptions: null,
+    genericDevices: false,
 };
 
 type ShelliesEvents = {
@@ -88,8 +93,9 @@ type ShelliesEvents = {
     exclude: (deviceId: DeviceId) => void;
     /**
      * The 'unknown' event is emitted when a device with an unrecognized model designation is discovered.
+     * @param willAddGeneric - `true` when the device will be added as a {@link GenericDevice}; `false` when it is ignored.
      */
-    unknown: (deviceId: DeviceId, model: string, identifiers: DeviceIdentifiers) => void;
+    unknown: (deviceId: DeviceId, model: string, identifiers: DeviceIdentifiers, willAddGeneric: boolean) => void;
 };
 
 /**
@@ -123,8 +129,8 @@ export class Shellies extends EventEmitter<ShelliesEvents> {
     protected readonly pendingDevices = new Set<DeviceId>();
 
     /**
-     * Holds IDs of devices that have been discovered but are excluded or whose
-     * model designation isn't recognized.
+     * Holds IDs of devices that have been discovered but are excluded, or whose
+     * model designation isn't recognized when generic devices are disabled.
      */
     protected readonly ignoredDevices = new Set<DeviceId>();
 
@@ -166,6 +172,25 @@ export class Shellies extends EventEmitter<ShelliesEvents> {
         this.emit('add', device);
 
         return this;
+    }
+
+    /**
+     * Creates a generic device, optionally loads its status and config, and adds it.
+     * @param info - Device information from Shelly.GetDeviceInfo.
+     * @param rpcHandler - RPC handler for the device.
+     */
+    async addGeneric(info: ShellyDeviceInfo, rpcHandler: RpcHandler): Promise<GenericDevice> {
+        const device = await GenericDevice.create(info, rpcHandler);
+
+        if (this.options.autoLoadStatus === true) {
+            await device.loadStatus();
+        }
+        if (this.options.autoLoadConfig === true) {
+            await device.loadConfig();
+        }
+
+        this.add(device);
+        return device;
     }
 
     /**
@@ -348,22 +373,24 @@ export class Shellies extends EventEmitter<ShelliesEvents> {
             // get the device class for this model
             const cls = Device.getClass(info.model ?? '');
 
-            if (cls === undefined) {
-                // abort if we don't have a matching device class
+            let device: Device;
+
+            if (cls !== undefined) {
+                device = new cls(info, rpcHandler);
+            } else if (this.options.genericDevices && info.gen >= 2) {
+                this.emit('unknown', deviceId, info.model, identifiers, true);
+                device = await GenericDevice.create(info, rpcHandler);
+            } else {
                 this.ignoredDevices.add(deviceId);
-                this.emit('unknown', deviceId, info.model, identifiers);
+                this.emit('unknown', deviceId, info.model, identifiers, false);
+                this.pendingDevices.delete(deviceId);
                 return;
             }
 
-            // create the device
-            const device = new cls(info, rpcHandler);
-
             if (this.options.autoLoadStatus === true) {
-                // load its status
                 await device.loadStatus();
             }
             if (this.options.autoLoadConfig === true) {
-                // load its config
                 await device.loadConfig();
             }
 

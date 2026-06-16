@@ -33,6 +33,7 @@ import {
     WiFiConfig,
 } from '../components';
 import { Device } from '../devices';
+import { RpcParams } from '../rpc';
 import { Service } from './base';
 
 export interface ShellyStatus {
@@ -144,6 +145,28 @@ export interface ShellyPutUserCaResponse {
     len: number;
 }
 
+export interface ShellyComponentInfo {
+    key: string;
+    status?: Record<string, unknown>;
+    config?: Record<string, unknown>;
+}
+
+export interface ShellyComponents {
+    components: ShellyComponentInfo[];
+    cfg_rev: number;
+    offset: number;
+    total: number;
+}
+
+export type ShellyComponentInclude = 'status' | 'config';
+
+export interface ShellyGetComponentsParams extends RpcParams {
+    offset?: number;
+    include?: ShellyComponentInclude[];
+    keys?: string[];
+    dynamic_only?: boolean;
+}
+
 /**
  * The common Shelly service that all devices have.
  */
@@ -171,6 +194,31 @@ export class ShellyService extends Service {
      */
     listMethods(): PromiseLike<ShellyMethods> {
         return this.rpc<ShellyMethods>('ListMethods');
+    }
+
+    /**
+     * Retrieves a page of device components with optional status and config data.
+     */
+    getComponents(params?: ShellyGetComponentsParams): PromiseLike<ShellyComponents> {
+        return this.rpc<ShellyComponents>('GetComponents', params);
+    }
+
+    /**
+     * Retrieves all device components, paginating through the full result set.
+     */
+    async getAllComponents(include?: ShellyComponentInclude[]): Promise<ShellyComponentInfo[]> {
+        const components: ShellyComponentInfo[] = [];
+        let offset = 0;
+        let total = 0;
+
+        do {
+            const page = await this.getComponents({ offset, include });
+            components.push(...page.components);
+            offset += page.components.length;
+            total = page.total;
+        } while (offset < total);
+
+        return components;
     }
 
     /**

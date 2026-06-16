@@ -1,4 +1,5 @@
 export * from './base';
+export * from './generic';
 
 export * from './shelly-plus-1';
 export * from './shelly-plus-pm';

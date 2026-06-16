@@ -1,4 +1,6 @@
 import { Device } from './devices';
+import { DeviceDiscoverer } from './discovery';
+import { GenericDevice } from './devices/generic';
 import { RpcHandler } from './rpc';
 import { Shellies } from './shellies';
 
@@ -289,6 +291,135 @@ describe('Shellies', () => {
             expect(listener).toHaveBeenNthCalledWith(1, device1);
             expect(listener).toHaveBeenNthCalledWith(2, device2);
             expect(listener).toHaveBeenNthCalledWith(3, device3);
+        });
+    });
+
+    describe('generic device discovery', () => {
+        class TestDiscoverer extends DeviceDiscoverer {
+            discover(identifiers: { deviceId: string; hostname: string }) {
+                this.handleDiscoveredDevice(identifiers);
+            }
+        }
+
+        class DiscoveryRpcHandler extends RpcHandler {
+            constructor(readonly responses: Record<string, unknown>) {
+                super('test');
+            }
+
+            connected = true;
+            request = vi.fn((method: string) => {
+                if (Object.prototype.hasOwnProperty.call(this.responses, method)) {
+                    return Promise.resolve(this.responses[method]);
+                }
+
+                return Promise.resolve({
+                    components: [],
+                    cfg_rev: 0,
+                    offset: 0,
+                    total: 0,
+                });
+            });
+            destroy = vi.fn().mockImplementation(() => Promise.resolve());
+        }
+
+        test('adds a GenericDevice when genericDevices is enabled', async () => {
+            const shellies = new Shellies({ genericDevices: true, autoLoadStatus: false, autoLoadConfig: false });
+            const discoverer = new TestDiscoverer();
+            const unknownListener = vi.fn();
+            const addListener = vi.fn();
+
+            shellies.on('unknown', unknownListener);
+            shellies.on('add', addListener);
+
+            const rpcHandler = new DiscoveryRpcHandler({
+                'Shelly.GetDeviceInfo': {
+                    id: 'abc123',
+                    mac: 'abc123',
+                    model: 'UNKNOWN-MODEL',
+                    gen: 2,
+                },
+                'Shelly.GetComponents': {
+                    components: [{ key: 'switch:0', status: { output: false } }],
+                    cfg_rev: 1,
+                    offset: 0,
+                    total: 1,
+                },
+            });
+
+            vi.spyOn(shellies.websocket, 'create').mockReturnValue(rpcHandler);
+            shellies.registerDiscoverer(discoverer);
+
+            discoverer.discover({ deviceId: 'abc123', hostname: '192.168.1.10' });
+            await vi.waitFor(() => expect(addListener).toHaveBeenCalledTimes(1));
+
+            expect(unknownListener).toHaveBeenCalledWith('abc123', 'UNKNOWN-MODEL', {
+                deviceId: 'abc123',
+                hostname: '192.168.1.10',
+            }, true);
+            expect(addListener.mock.calls[0][0]).toBeInstanceOf(GenericDevice);
+            expect(shellies.has('abc123')).toBe(true);
+        });
+
+        test('does not call GetStatus or GetConfig after GenericDevice discovery when autoLoad is enabled', async () => {
+            const shellies = new Shellies({ genericDevices: true, autoLoadStatus: true, autoLoadConfig: true });
+            const discoverer = new TestDiscoverer();
+            const rpcHandler = new DiscoveryRpcHandler({
+                'Shelly.GetDeviceInfo': {
+                    id: 'abc123',
+                    mac: 'abc123',
+                    model: 'UNKNOWN-MODEL',
+                    gen: 2,
+                },
+                'Shelly.GetComponents': {
+                    components: [{ key: 'switch:0', status: { output: false } }],
+                    cfg_rev: 1,
+                    offset: 0,
+                    total: 1,
+                },
+            });
+
+            vi.spyOn(shellies.websocket, 'create').mockReturnValue(rpcHandler);
+            shellies.registerDiscoverer(discoverer);
+
+            discoverer.discover({ deviceId: 'abc123', hostname: '192.168.1.10' });
+            await vi.waitFor(() => expect(shellies.has('abc123')).toBe(true));
+
+            const methods = rpcHandler.request.mock.calls.map((call) => call[0]);
+            expect(methods).toContain('Shelly.GetComponents');
+            expect(methods).not.toContain('Shelly.GetStatus');
+            expect(methods).not.toContain('Shelly.GetConfig');
+        });
+
+        test('ignores unknown models when genericDevices is disabled', async () => {
+            const shellies = new Shellies({ genericDevices: false, autoLoadStatus: false, autoLoadConfig: false });
+            const discoverer = new TestDiscoverer();
+            const unknownListener = vi.fn();
+            const addListener = vi.fn();
+
+            shellies.on('unknown', unknownListener);
+            shellies.on('add', addListener);
+
+            const rpcHandler = new DiscoveryRpcHandler({
+                'Shelly.GetDeviceInfo': {
+                    id: 'abc123',
+                    mac: 'abc123',
+                    model: 'UNKNOWN-MODEL',
+                    gen: 2,
+                },
+            });
+
+            vi.spyOn(shellies.websocket, 'create').mockReturnValue(rpcHandler);
+            shellies.registerDiscoverer(discoverer);
+
+            discoverer.discover({ deviceId: 'abc123', hostname: '192.168.1.10' });
+            await vi.waitFor(() => expect(unknownListener).toHaveBeenCalledTimes(1));
+
+            expect(unknownListener).toHaveBeenCalledWith('abc123', 'UNKNOWN-MODEL', {
+                deviceId: 'abc123',
+                hostname: '192.168.1.10',
+            }, false);
+            expect(addListener).not.toHaveBeenCalled();
+            expect(shellies.has('abc123')).toBe(false);
         });
     });
 });

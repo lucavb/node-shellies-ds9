@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 import { Device } from '../devices';
 import { RpcHandler } from '../rpc';
 import { ShellyService } from './shelly';
@@ -36,7 +34,8 @@ describe('ShellyService', () => {
     });
 
     describe('.setAuth()', () => {
-        test('creates a valid hash', () => {
+        test('creates a valid hash', async () => {
+            const crypto = await import('crypto');
             const password = 'qwerty';
             const hash = crypto.createHash('sha256').update(`admin:${device.id}:${password}`).digest('hex');
 
@@ -56,6 +55,42 @@ describe('ShellyService', () => {
                 user: 'admin',
                 realm: device.id,
                 ha1: null,
+            });
+        });
+    });
+
+    describe('.getAllComponents()', () => {
+        test('paginates through all component pages', async () => {
+            const request = vi
+                .fn()
+                .mockResolvedValueOnce({
+                    components: [{ key: 'switch:0' }, { key: 'wifi' }],
+                    cfg_rev: 1,
+                    offset: 0,
+                    total: 3,
+                })
+                .mockResolvedValueOnce({
+                    components: [{ key: 'sys' }],
+                    cfg_rev: 1,
+                    offset: 2,
+                    total: 3,
+                });
+
+            device = new TestDevice();
+            (device.rpcHandler as TestRpcHandler).request = request;
+            service = new ShellyService(device);
+
+            const components = await service.getAllComponents(['status', 'config']);
+
+            expect(components).toEqual([{ key: 'switch:0' }, { key: 'wifi' }, { key: 'sys' }]);
+            expect(request).toHaveBeenCalledTimes(2);
+            expect(request).toHaveBeenNthCalledWith(1, 'Shelly.GetComponents', {
+                offset: 0,
+                include: ['status', 'config'],
+            });
+            expect(request).toHaveBeenNthCalledWith(2, 'Shelly.GetComponents', {
+                offset: 2,
+                include: ['status', 'config'],
             });
         });
     });

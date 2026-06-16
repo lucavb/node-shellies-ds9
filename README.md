@@ -114,6 +114,49 @@ discoverer.start();
 
 See [homebridge-shelly-ng]() for a real-world example.
 
+## Generic / unsupported devices
+
+By default, unrecognized model strings are ignored and an `unknown` event is emitted. You can opt in to **generic device** support so Gen2+ hardware is discovered and controlled without a typed device class:
+
+```typescript
+import {
+    GenericDevice,
+    isGenericDevice,
+    MdnsDeviceDiscoverer,
+    Shellies,
+} from '@lucavb/shellies-ds9';
+
+const shellies = new Shellies({ genericDevices: true });
+
+shellies.on('unknown', (deviceId, model, identifiers, willAddGeneric) => {
+    if (willAddGeneric) {
+        console.log(`Unknown model ${model} (${deviceId}) — will add as generic device`);
+    } else {
+        console.log(`Unknown model ${model} (${deviceId}) — ignored`);
+    }
+});
+
+shellies.on('add', async (device) => {
+    if (isGenericDevice(device)) {
+        const sw = device.get('switch:0');
+        sw.on('change:output', (on) => console.log('switch output:', on));
+        await device.call('Switch.Toggle', { id: 0 });
+    }
+});
+
+// manual path
+const device = await shellies.addGeneric(info, rpcHandler);
+```
+
+When `genericDevices` is enabled:
+
+- Components are discovered at runtime via `Shelly.GetComponents`
+- Known component keys (`switch:0`, `cover:0`, etc.) use the same typed component classes as registered devices
+- Unknown component types are exposed as dynamic proxies with `change` events and `call()` RPC access
+- The `unknown` event includes a `willAddGeneric` flag: `true` when a `GenericDevice` `add` follows, `false` when the device is ignored
+
+`genericDevices` defaults to `false` today and may default to `true` in a future major release.
+
 ## Credits
 
 This fork builds upon the excellent work of:

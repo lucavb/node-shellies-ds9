@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 
 import { Component, ComponentLike, System } from '../components';
 import { HttpService, KvsService, ScheduleService, ShellyService, WebhookService } from '../services';
-import { RpcEventNotification, RpcHandler, RpcStatusNotification } from '../rpc';
+import { RpcEventNotification, RpcHandler, RpcParams, RpcStatusNotification } from '../rpc';
 
 export type DeviceId = string;
 
@@ -186,7 +186,7 @@ export abstract class Device extends EventEmitter {
         rpcHandler.on('event', this.eventHandler, this);
     }
 
-    private _model: string | undefined;
+    private readonly _model: string | undefined;
 
     /**
      * The model designation of this device.
@@ -267,6 +267,15 @@ export abstract class Device extends EventEmitter {
         for (const [key, prop] of this.components.entries()) {
             yield [key, this[prop]];
         }
+    }
+
+    /**
+     * Invokes an RPC method on the device.
+     * @param method - The full RPC method name (e.g. `Switch.Set`).
+     * @param params - Optional parameters for the RPC call.
+     */
+    call<T = unknown>(method: string, params?: RpcParams): PromiseLike<T> {
+        return this.rpcHandler.request<T>(method, params);
     }
 
     /**
