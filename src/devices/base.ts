@@ -1,6 +1,8 @@
 import EventEmitter from 'eventemitter3';
 
 import { Component, ComponentLike, System } from '../components';
+import { collectAddonSensorKeys, isAddonSensorKey } from '../components/addon-sensors';
+import { createComponent } from '../components/factory';
 import { HttpService, KvsService, ScheduleService, ShellyService, WebhookService } from '../services';
 import { RpcEventNotification, RpcHandler, RpcParams, RpcStatusNotification } from '../rpc';
 
@@ -204,6 +206,8 @@ export abstract class Device extends EventEmitter {
 
     private _components: Map<string, string> | null = null;
 
+    private readonly _addonComponents = new Map<string, ComponentLike>();
+
     /**
      * Maps component keys to property names.
      */
@@ -243,7 +247,7 @@ export abstract class Device extends EventEmitter {
      * @param key - The component key.
      */
     hasComponent(key: string): boolean {
-        return this.components.has(key);
+        return this.components.has(key) || this._addonComponents.has(key);
     }
 
     /**
@@ -256,7 +260,48 @@ export abstract class Device extends EventEmitter {
             return this[prop];
         }
 
-        return undefined;
+        return this._addonComponents.get(key);
+    }
+
+    /**
+     * Registers add-on temperature/humidity components (ID >= 100) from status and config payloads.
+     */
+    protected ensureAddonComponent(
+        key: string,
+        status?: Record<string, unknown>,
+        config?: Record<string, unknown>,
+    ): ComponentLike | undefined {
+        if (!isAddonSensorKey(key) || this.hasComponent(key)) {
+            return this.getComponent(key);
+        }
+
+        const component = createComponent(this, { key, status, config });
+        this._addonComponents.set(key, component);
+        return component;
+    }
+
+    /**
+     * Discovers add-on temperature and humidity components from the device status and config.
+     */
+    async discoverAddonComponents(seedStatus?: RpcStatusNotification): Promise<void> {
+        const status = seedStatus ?? (await this.shelly.getStatus());
+        let config: Record<string, unknown> = {};
+
+        try {
+            config = (await this.shelly.getConfig()) as Record<string, unknown>;
+        } catch {
+            // Config is optional for discovery.
+        }
+
+        const keys = collectAddonSensorKeys(status as Record<string, unknown>, config);
+
+        for (const key of keys) {
+            this.ensureAddonComponent(
+                key,
+                status[key] as Record<string, unknown> | undefined,
+                config[key] as Record<string, unknown> | undefined,
+            );
+        }
     }
 
     /**
@@ -266,6 +311,10 @@ export abstract class Device extends EventEmitter {
     *[Symbol.iterator](): IterableIterator<[string, ComponentLike]> {
         for (const [key, prop] of this.components.entries()) {
             yield [key, this[prop]];
+        }
+
+        for (const [key, component] of this._addonComponents.entries()) {
+            yield [key, component];
         }
     }
 
@@ -292,6 +341,10 @@ export abstract class Device extends EventEmitter {
                 status[cmpnt] !== null &&
                 typeof status[cmpnt] === 'object'
             ) {
+                if (isAddonSensorKey(cmpnt) && !this.hasComponent(cmpnt)) {
+                    this.ensureAddonComponent(cmpnt, status[cmpnt] as Record<string, unknown>);
+                }
+
                 this.getComponent(cmpnt)?.update(status[cmpnt] as Record<string, unknown>);
             }
         }
@@ -327,6 +380,10 @@ export abstract class Device extends EventEmitter {
                 update[cmpnt] !== null &&
                 typeof update[cmpnt] === 'object'
             ) {
+                if (isAddonSensorKey(cmpnt) && !this.hasComponent(cmpnt)) {
+                    this.ensureAddonComponent(cmpnt, update[cmpnt] as Record<string, unknown>);
+                }
+
                 this.getComponent(cmpnt)?.update(update[cmpnt] as Record<string, unknown>);
             }
         }

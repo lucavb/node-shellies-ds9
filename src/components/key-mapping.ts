@@ -1,8 +1,12 @@
 import {
     FunctionalComponentKey,
     isFunctionalComponentKey,
+    isSensorComponentKey,
     parseFunctionalComponentId,
     parseFunctionalComponentType,
+    parseSensorComponentId,
+    parseSensorComponentType,
+    SensorComponentKey,
     ServiceComponentKey,
 } from './keys';
 
@@ -12,6 +16,11 @@ export const FUNCTIONAL_TYPE_TO_RPC = {
     light: 'Light',
     input: 'Input',
 } as const satisfies Record<'switch' | 'cover' | 'light' | 'input', string>;
+
+export const SENSOR_TYPE_TO_RPC = {
+    temperature: 'Temperature',
+    humidity: 'Humidity',
+} as const satisfies Record<'temperature' | 'humidity', string>;
 
 /**
  * RPC name prefixes for dynamic/virtual component types (numeric IDs).
@@ -44,8 +53,11 @@ export type FunctionalComponentType = keyof typeof FUNCTIONAL_TYPE_TO_RPC;
 
 export type DynamicComponentType = keyof typeof DYNAMIC_TYPE_TO_RPC;
 
+export type SensorComponentType = keyof typeof SENSOR_TYPE_TO_RPC;
+
 export type ParsedComponentKey =
     | { kind: 'functional'; type: FunctionalComponentType; id: number; rpcName: string; key: FunctionalComponentKey }
+    | { kind: 'sensor'; type: SensorComponentType; id: number; rpcName: string; key: SensorComponentKey }
     | { kind: 'service'; key: ServiceComponentKey; rpcName: string }
     | { kind: 'unknown'; key: string; rpcName: string; id?: number };
 
@@ -90,6 +102,19 @@ export function parseComponentKey(key: string): ParsedComponentKey {
             key,
             kind: 'functional',
             rpcName: FUNCTIONAL_TYPE_TO_RPC[type],
+            type,
+        };
+    }
+
+    if (isSensorComponentKey(key)) {
+        const type = parseSensorComponentType(key);
+        const id = parseSensorComponentId(key);
+
+        return {
+            id,
+            key,
+            kind: 'sensor',
+            rpcName: SENSOR_TYPE_TO_RPC[type],
             type,
         };
     }

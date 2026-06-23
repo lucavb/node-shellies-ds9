@@ -1,3 +1,4 @@
+export * from './addon-sensors';
 export * from './base';
 export * from './bluetooth-low-energy';
 export * from './cloud';

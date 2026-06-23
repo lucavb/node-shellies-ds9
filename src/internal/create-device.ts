@@ -1,5 +1,5 @@
 import { Device } from '../devices';
-import { GenericDevice } from '../devices/generic';
+import { GenericDevice, isGenericDevice } from '../devices/generic';
 import { RpcHandler, RpcStatusNotification } from '../rpc';
 import { ShellyDeviceInfo } from '../services';
 
@@ -59,6 +59,10 @@ export async function createDeviceFromInfo(
         device = await GenericDevice.create(info, rpcHandler);
     } else {
         return null;
+    }
+
+    if (!isGenericDevice(device)) {
+        await device.discoverAddonComponents(options.seedStatus ?? undefined);
     }
 
     if (options.seedStatus) {

@@ -35,6 +35,18 @@ describe('parseComponentKey', () => {
         });
     });
 
+    test('parses sensor humidity keys', () => {
+        const parsed = parseComponentKey('humidity:100');
+
+        expect(parsed).toEqual({
+            kind: 'sensor',
+            type: 'humidity',
+            id: 100,
+            rpcName: 'Humidity',
+            key: 'humidity:100',
+        });
+    });
+
     test('parses unknown keyed components', () => {
         const parsed = parseComponentKey('bthomesensor:200');
 

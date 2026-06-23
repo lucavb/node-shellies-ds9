@@ -19,6 +19,19 @@ import { Temperature } from './temperature';
 import { Ui } from './ui';
 import { WiFi } from './wifi';
 
+function createSensorComponent(device: Device, parsed: Extract<ParsedComponentKey, { kind: 'sensor' }>) {
+    switch (parsed.type) {
+        case 'temperature':
+            return new Temperature(device, parsed.id);
+        case 'humidity':
+            return new Humidity(device, parsed.id);
+        default: {
+            const _exhaustive: never = parsed.type;
+            return _exhaustive;
+        }
+    }
+}
+
 function createFunctionalComponent(device: Device, parsed: Extract<ParsedComponentKey, { kind: 'functional' }>) {
     switch (parsed.type) {
         case 'switch':
@@ -97,6 +110,9 @@ export function createComponent(device: Device, entry: ShellyComponentInfo): Com
     switch (parsed.kind) {
         case 'functional':
             component = createFunctionalComponent(device, parsed);
+            break;
+        case 'sensor':
+            component = createSensorComponent(device, parsed);
             break;
         case 'service':
             component = createServiceComponent(device, parsed);

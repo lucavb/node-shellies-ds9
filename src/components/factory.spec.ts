@@ -4,7 +4,9 @@ import { Switch } from './switch';
 import { Cover } from './cover';
 import { WiFi } from './wifi';
 import { DynamicComponent } from './dynamic';
+import { Humidity } from './humidity';
 import { createComponent } from './factory';
+import { Temperature } from './temperature';
 
 class TestRpcHandler extends RpcHandler {
     constructor() {
@@ -60,6 +62,28 @@ describe('createComponent', () => {
         });
 
         expect(component).toBeInstanceOf(WiFi);
+    });
+
+    test('creates typed temperature components for add-on ids', () => {
+        const component = createComponent(device, {
+            key: 'temperature:101',
+            status: { id: 101, tC: 24.4 },
+        });
+
+        expect(component).toBeInstanceOf(Temperature);
+        expect(component.key).toBe('temperature:101');
+        expect((component as Temperature).tC).toBe(24.4);
+    });
+
+    test('creates typed humidity components for add-on ids', () => {
+        const component = createComponent(device, {
+            key: 'humidity:100',
+            status: { id: 100, rh: 73.7 },
+        });
+
+        expect(component).toBeInstanceOf(Humidity);
+        expect(component.key).toBe('humidity:100');
+        expect((component as Humidity).rh).toBe(73.7);
     });
 
     test('creates dynamic components for unknown keys', () => {
