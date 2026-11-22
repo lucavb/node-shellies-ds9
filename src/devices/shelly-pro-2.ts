@@ -49,3 +49,9 @@ export class ShellyPro2Rev2 extends ShellyPro2Rev1 {
 }
 
 Device.registerClass(ShellyPro2Rev2);
+
+export class ShellyPro2Rev2Ul extends ShellyPro2Rev2 {
+    static readonly model: string = 'SPSW-202XE12UL';
+}
+
+Device.registerClass(ShellyPro2Rev2Ul);
