@@ -1,6 +1,7 @@
 export * from './base';
 export * from './generic';
 export * from './shelly-blu-gateway';
+export * from './shelly-energy-meter';
 
 export * from './shelly-plus-1';
 export * from './shelly-plus-pm';
