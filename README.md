@@ -60,6 +60,8 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Pro 2](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro2)
 - [Shelly Pro 2 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro2PM)
 - [Shelly Pro 3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro3)
+- [Shelly Pro 3EM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro3EM)
+- [Shelly 3EM-63 Gen3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/Shelly3EM63G3)
 - [Shelly Pro 4 PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPro4PM)
 - [Shelly Pro Dual Cover PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDualCoverPM)
 - [Shelly Pro Dimmer 1PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyProDimmer1PM)
@@ -75,6 +77,35 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly 1 PM Mini Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyMini1PMG4/)
 - [Shelly Plug US Gen4](https://kb.shelly.cloud/knowledge-base/shelly-plug-us-gen4)
 - [Shelly Power Strip 4 Gen4](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen4/ShellyPowerStripG4/)
+- Shelly Dimmer Gen4 (including US variant)
+- [Shelly Plus RGBW PM](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusRGBWPM)
+- [Shelly BLU Gateway Gen3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen3/ShellyBluGatewayG3)
+
+For the Pro 3EM and 3EM-63 Gen3, `meterProfile` reflects the active metering
+topology. The inherited `profile` is the value reported when the device was
+initially identified. Profile changes can replace component instances.
+
+### Hosted BTHome sensors
+
+A Shelly RPC device that already exposes paired BTHome devices and sensors can
+refresh their components explicitly. The host and its firmware must support
+`Shelly.GetComponents`; this does not pair sensors or provide Zigbee support.
+
+```typescript
+import { DynamicComponent } from '@lucavb/shellies-ds9';
+
+await device.refreshBTHomeComponents();
+for (const [key, component] of device) {
+    if (key.startsWith('bthomesensor:') && component instanceof DynamicComponent) {
+        console.log(key, component.status, component.attrs);
+        component.on('change', (field, value) => console.log(key, field, value));
+    }
+}
+```
+
+Call `refreshBTHomeComponents()` again after pairing or removing devices. The
+BLU Gateway and generic devices refresh their complete component inventory.
+Homebridge accessory support requires corresponding plugin changes.
 
 ## Outbound WebSocket server
 
