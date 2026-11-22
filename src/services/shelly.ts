@@ -161,6 +161,8 @@ export interface ShellyComponents {
 
 export type ShellyComponentInclude = 'status' | 'config';
 
+const MAX_COMPONENT_SCAN_ATTEMPTS = 3;
+
 export interface ShellyGetComponentsParams extends RpcParams {
     offset?: number;
     include?: ShellyComponentInclude[];
@@ -206,32 +208,52 @@ export class ShellyService extends Service {
 
     /**
      * Retrieves all device components, paginating through the full result set.
+     * cfg_rev is checked between pages as a best-effort consistency check; it
+     * does not guarantee detection of every possible firmware-side mutation.
      */
     async getAllComponents(include?: ShellyComponentInclude[]): Promise<ShellyComponentInfo[]> {
-        const components: ShellyComponentInfo[] = [];
-        let offset = 0;
-        let total = 0;
+        for (let attempt = 0; attempt < MAX_COMPONENT_SCAN_ATTEMPTS; attempt++) {
+            const components: ShellyComponentInfo[] = [];
+            let offset = 0;
+            let total = 0;
+            let expectedCfgRev: number | undefined;
+            let hasCfgRev = false;
+            let revisionChanged = false;
 
-        do {
-            const page = await this.getComponents({ offset, include });
-            components.push(...page.components);
-            total = page.total;
-
-            if (page.components.length === 0) {
-                if (offset < total) {
-                    throw new Error('Shelly.GetComponents returned an empty page before discovery was complete');
+            do {
+                const page = await this.getComponents({ offset, include });
+                if (hasCfgRev && page.cfg_rev !== expectedCfgRev) {
+                    revisionChanged = true;
+                    break;
                 }
-                break;
-            }
+                expectedCfgRev = page.cfg_rev;
+                hasCfgRev = true;
 
-            const nextOffset = offset + page.components.length;
-            if (nextOffset <= offset) {
-                throw new Error('Shelly.GetComponents pagination stalled before discovery was complete');
-            }
-            offset = nextOffset;
-        } while (offset < total);
+                components.push(...page.components);
+                total = page.total;
 
-        return components;
+                if (page.components.length === 0) {
+                    if (offset < total) {
+                        throw new Error('Shelly.GetComponents returned an empty page before discovery was complete');
+                    }
+                    break;
+                }
+
+                const nextOffset = offset + page.components.length;
+                if (nextOffset <= offset) {
+                    throw new Error('Shelly.GetComponents pagination stalled before discovery was complete');
+                }
+                offset = nextOffset;
+            } while (offset < total);
+
+            if (!revisionChanged) {
+                return components;
+            }
+        }
+
+        throw new Error(
+            `Shelly.GetComponents configuration revision changed during all ${MAX_COMPONENT_SCAN_ATTEMPTS} discovery attempts`,
+        );
     }
 
     /**

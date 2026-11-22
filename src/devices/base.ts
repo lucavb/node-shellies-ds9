@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-import { Component, ComponentLike, System } from '../components';
+import { Component, ComponentLike, DynamicComponent, System } from '../components';
 import { collectAddonSensorKeys, isAddonSensorKey } from '../components/addon-sensors';
 import { createComponent } from '../components/factory';
 import { HttpService, KvsService, ScheduleService, ShellyService, WebhookService } from '../services';
@@ -208,6 +208,11 @@ export abstract class Device extends EventEmitter {
 
     private readonly _addonComponents = new Map<string, ComponentLike>();
 
+    /** BTHome devices/sensors exposed by the host's dynamic component inventory. */
+    private readonly _bthomeComponents = new Map<string, DynamicComponent>();
+
+    private _bthomeRefreshPromise: Promise<void> | null = null;
+
     /**
      * Maps component keys to property names.
      */
@@ -247,7 +252,7 @@ export abstract class Device extends EventEmitter {
      * @param key - The component key.
      */
     hasComponent(key: string): boolean {
-        return this.components.has(key) || this._addonComponents.has(key);
+        return this.components.has(key) || this._addonComponents.has(key) || this._bthomeComponents.has(key);
     }
 
     /**
@@ -260,7 +265,7 @@ export abstract class Device extends EventEmitter {
             return this[prop];
         }
 
-        return this._addonComponents.get(key);
+        return this._addonComponents.get(key) ?? this._bthomeComponents.get(key);
     }
 
     /**
@@ -305,6 +310,59 @@ export abstract class Device extends EventEmitter {
     }
 
     /**
+     * Explicitly refreshes BTHome device and sensor components exposed by this
+     * RPC host. Discovery is opt-in for compatibility with older firmware.
+     * Existing component instances are retained when their keys remain present.
+     */
+    refreshBTHomeComponents(): Promise<void> {
+        if (this._bthomeRefreshPromise) {
+            return this._bthomeRefreshPromise;
+        }
+
+        const refresh = this.discoverBTHomeComponents().finally(() => {
+            if (this._bthomeRefreshPromise === refresh) {
+                this._bthomeRefreshPromise = null;
+            }
+        });
+        this._bthomeRefreshPromise = refresh;
+        return refresh;
+    }
+
+    private async discoverBTHomeComponents(): Promise<void> {
+        const entries = await this.shelly.getAllComponents(['status', 'config']);
+
+        const discoveredKeys = new Set<string>();
+        for (const entry of entries) {
+            if (!/^bthome(?:device|sensor):\d+$/i.test(entry.key)) {
+                continue;
+            }
+
+            discoveredKeys.add(entry.key);
+            const existing = this._bthomeComponents.get(entry.key);
+            if (existing) {
+                if (entry.attrs !== undefined) {
+                    existing.updateAttrs(entry.attrs);
+                }
+
+                if (entry.status) {
+                    existing.update(entry.status);
+                }
+                if (entry.config) {
+                    existing.config = entry.config;
+                }
+            } else {
+                this._bthomeComponents.set(entry.key, createComponent(this, entry) as DynamicComponent);
+            }
+        }
+
+        for (const key of this._bthomeComponents.keys()) {
+            if (!discoveredKeys.has(key)) {
+                this._bthomeComponents.delete(key);
+            }
+        }
+    }
+
+    /**
      * Returns a new Iterator object that contains each of the device's
      * components.
      */
@@ -316,6 +374,10 @@ export abstract class Device extends EventEmitter {
         for (const [key, component] of this._addonComponents.entries()) {
             yield [key, component];
         }
+
+        for (const [key, component] of this._bthomeComponents.entries()) {
+            yield [key, component];
+        }
     }
 
     /**
@@ -325,6 +387,11 @@ export abstract class Device extends EventEmitter {
      */
     call<T = unknown>(method: string, params?: RpcParams): PromiseLike<T> {
         return this.rpcHandler.request<T>(method, params);
+    }
+
+    /** Applies a buffered initial status update through the device's normal notification handler. */
+    applyInitialStatus(update: RpcStatusNotification): void {
+        this.statusUpdateHandler(update);
     }
 
     /**
@@ -363,6 +430,8 @@ export abstract class Device extends EventEmitter {
                 const c = this.getComponent(cmpnt);
                 if (c && c instanceof Component) {
                     c.config = config[cmpnt];
+                } else if (c instanceof DynamicComponent && /^bthome(?:device|sensor):\d+$/i.test(cmpnt)) {
+                    c.config = config[cmpnt] as Record<string, unknown>;
                 }
             }
         }
@@ -395,7 +464,18 @@ export abstract class Device extends EventEmitter {
     protected eventHandler(events: RpcEventNotification) {
         // pass each event on to its corresponding component
         for (const event of events.events) {
-            this.getComponent(event.component)?.handleEvent(event);
+            const component = this.getComponent(event.component);
+            if (component) {
+                component.handleEvent(event);
+                continue;
+            }
+
+            // Split-ID events use a component type and numeric ID separately,
+            // while inventory/status keys combine them (for example
+            // bthomesensor:42 or blutrv:12).
+            if (event.id !== undefined) {
+                this.getComponent(`${event.component}:${event.id}`)?.handleEvent(event);
+            }
         }
     }
 }

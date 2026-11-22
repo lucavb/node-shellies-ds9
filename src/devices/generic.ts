@@ -18,26 +18,37 @@ export class ComponentNotFoundError extends Error {
  * A device whose components are discovered at runtime via Shelly.GetComponents.
  */
 export class GenericDevice extends Device {
-    static readonly model = '';
-    static readonly modelName = 'Shelly Device';
+    static readonly model: string = '';
+    static readonly modelName: string = 'Shelly Device';
 
     private readonly _dynamicComponents = new Map<string, ComponentLike>();
+    private _discoveryPromise: Promise<void> | null = null;
+
+    protected get isDiscoveringComponents(): boolean {
+        return this._discoveryPromise !== null;
+    }
 
     /**
-     * Skips the first {@link loadStatus} / {@link loadConfig} after discovery, since
-     * {@link discoverComponents} already seeded data from Shelly.GetComponents.
+     * Skips the first {@link loadStatus} / {@link loadConfig} after initial
+     * discovery, since {@link discoverComponents} already seeded data from
+     * Shelly.GetComponents. Later rediscovery must not suppress explicit refreshes.
      */
     private _skipInitialLoad = {
         status: false,
         config: false,
     };
+    private _hasCompletedInitialDiscovery = false;
 
     /**
      * Creates a generic device and discovers its components from the device firmware.
      */
-    static async create(info: DeviceInfo, rpcHandler: RpcHandler): Promise<GenericDevice> {
-        const device = new GenericDevice(info, rpcHandler);
-        await device.discoverComponents();
+    static async create<T extends GenericDevice>(
+        this: new (info: DeviceInfo, rpcHandler: RpcHandler) => T,
+        info: DeviceInfo,
+        rpcHandler: RpcHandler,
+    ): Promise<T> {
+        const device = new this(info, rpcHandler);
+        await device.rediscoverComponents();
         return device;
     }
 
@@ -48,10 +59,8 @@ export class GenericDevice extends Device {
         return this.model ? `Shelly ${this.model}` : 'Shelly Device';
     }
 
-    /**
-     * Returns a component with a known functional key and a narrowed type.
-     */
-    get<K extends FunctionalComponentKey>(key: K): TypedComponentMap[K];
+    /** Returns a component with a known typed key and a narrowed type. */
+    get<K extends keyof TypedComponentMap>(key: K): TypedComponentMap[K];
 
     /**
      * Returns a component by key.
@@ -137,8 +146,37 @@ export class GenericDevice extends Device {
         }
     }
 
-    private async discoverComponents() {
+    /**
+     * Refreshes the runtime component inventory. Existing component objects are
+     * retained for keys that remain present so listeners and references survive
+     * pairing changes and reconnects.
+     */
+    rediscoverComponents(): Promise<void> {
+        if (this._discoveryPromise) {
+            return this._discoveryPromise;
+        }
+
+        const discovery = this.discoverComponents().finally(() => {
+            if (this._discoveryPromise === discovery) {
+                this._discoveryPromise = null;
+            }
+        });
+        this._discoveryPromise = discovery;
+        return discovery;
+    }
+
+    /**
+     * Refreshes this runtime-discovered device's complete component inventory,
+     * including BTHome components.
+     */
+    override refreshBTHomeComponents(): Promise<void> {
+        return this.rediscoverComponents();
+    }
+
+    private async discoverComponents(): Promise<void> {
         const entries = await this.shelly.getAllComponents(['status', 'config']);
+
+        const discoveredKeys = new Set<string>();
 
         for (const entry of entries) {
             if (entry.key === 'sys') {
@@ -151,14 +189,42 @@ export class GenericDevice extends Device {
                 continue;
             }
 
-            const component = createComponent(this, entry);
-            this._dynamicComponents.set(entry.key, component);
+            discoveredKeys.add(entry.key);
+            let component = this._dynamicComponents.get(entry.key);
+            if (!component) {
+                component = createComponent(this, entry);
+                this._dynamicComponents.set(entry.key, component);
+            } else {
+                if (component instanceof DynamicComponent && entry.attrs !== undefined) {
+                    component.updateAttrs(entry.attrs);
+                }
+
+                if (entry.status) {
+                    component.update(entry.status);
+                }
+                if (entry.config) {
+                    if (component instanceof Component) {
+                        component.config = entry.config;
+                    } else if (component instanceof DynamicComponent) {
+                        component.config = entry.config;
+                    }
+                }
+            }
         }
 
-        this._skipInitialLoad = {
-            status: true,
-            config: true,
-        };
+        for (const key of this._dynamicComponents.keys()) {
+            if (!discoveredKeys.has(key)) {
+                this._dynamicComponents.delete(key);
+            }
+        }
+
+        if (!this._hasCompletedInitialDiscovery) {
+            this._skipInitialLoad = {
+                status: true,
+                config: true,
+            };
+            this._hasCompletedInitialDiscovery = true;
+        }
     }
 }
 

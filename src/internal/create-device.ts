@@ -29,16 +29,7 @@ export interface CreateDeviceOptions {
  * Applies a status notification payload to a device's components.
  */
 export function applyStatusNotification(device: Device, update: RpcStatusNotification): void {
-    for (const cmpnt in update) {
-        if (
-            cmpnt !== 'ts' &&
-            Object.prototype.hasOwnProperty.call(update, cmpnt) &&
-            update[cmpnt] !== null &&
-            typeof update[cmpnt] === 'object'
-        ) {
-            device.getComponent(cmpnt)?.update(update[cmpnt] as Record<string, unknown>);
-        }
-    }
+    device.applyInitialStatus(update);
 }
 
 /**
@@ -55,6 +46,9 @@ export async function createDeviceFromInfo(
 
     if (cls !== undefined) {
         device = new cls(info, rpcHandler);
+        if (isGenericDevice(device)) {
+            await device.rediscoverComponents();
+        }
     } else if (options.genericDevices && info.gen >= 2) {
         device = await GenericDevice.create(info, rpcHandler);
     } else {

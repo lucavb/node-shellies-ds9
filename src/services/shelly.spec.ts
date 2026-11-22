@@ -94,6 +94,82 @@ describe('ShellyService', () => {
             });
         });
 
+        test('restarts the complete scan when cfg_rev changes between pages', async () => {
+            const request = vi
+                .fn()
+                .mockResolvedValueOnce({
+                    components: [{ key: 'switch:0' }, { key: 'wifi' }],
+                    cfg_rev: 1,
+                    offset: 0,
+                    total: 4,
+                })
+                .mockResolvedValueOnce({
+                    components: [{ key: 'stale:0' }, { key: 'stale:1' }],
+                    cfg_rev: 2,
+                    offset: 2,
+                    total: 4,
+                })
+                .mockResolvedValueOnce({
+                    components: [{ key: 'switch:0' }, { key: 'sys' }],
+                    cfg_rev: 2,
+                    offset: 0,
+                    total: 4,
+                })
+                .mockResolvedValueOnce({
+                    components: [{ key: 'wifi' }, { key: 'mqtt' }],
+                    cfg_rev: 2,
+                    offset: 2,
+                    total: 4,
+                });
+
+            device = new TestDevice();
+            (device.rpcHandler as TestRpcHandler).request = request;
+            service = new ShellyService(device);
+
+            const components = await service.getAllComponents(['status']);
+
+            expect(components).toEqual([{ key: 'switch:0' }, { key: 'sys' }, { key: 'wifi' }, { key: 'mqtt' }]);
+            expect(components.some(({ key }) => key.startsWith('stale:'))).toBe(false);
+            expect(request.mock.calls.map(([, params]) => params?.offset)).toEqual([0, 2, 0, 2]);
+        });
+
+        test('rejects after bounded retries when cfg_rev keeps changing', async () => {
+            const request = vi.fn().mockImplementation((_method: string, params: { offset: number }) => {
+                const revision = Math.floor(request.mock.calls.length / 2);
+                const page =
+                    params.offset === 0
+                        ? { components: [{ key: 'switch:0' }], cfg_rev: revision + 1, offset: 0, total: 2 }
+                        : { components: [{ key: 'wifi' }], cfg_rev: revision + 2, offset: 1, total: 2 };
+                return Promise.resolve(page);
+            });
+
+            device = new TestDevice();
+            (device.rpcHandler as TestRpcHandler).request = request;
+            service = new ShellyService(device);
+
+            await expect(service.getAllComponents()).rejects.toThrow(
+                'Shelly.GetComponents configuration revision changed during all 3 discovery attempts',
+            );
+            expect(request).toHaveBeenCalledTimes(6);
+            expect(request.mock.calls.map(([, params]) => params?.offset)).toEqual([0, 1, 0, 1, 0, 1]);
+        });
+
+        test('returns a single-page inventory without another request', async () => {
+            const request = vi.fn().mockResolvedValue({
+                components: [{ key: 'switch:0' }],
+                cfg_rev: 1,
+                offset: 0,
+                total: 1,
+            });
+
+            device = new TestDevice();
+            (device.rpcHandler as TestRpcHandler).request = request;
+            service = new ShellyService(device);
+
+            await expect(service.getAllComponents()).resolves.toEqual([{ key: 'switch:0' }]);
+            expect(request).toHaveBeenCalledTimes(1);
+        });
+
         test('throws when a page is empty before the advertised total', async () => {
             const request = vi
                 .fn()

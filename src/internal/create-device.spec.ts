@@ -1,12 +1,18 @@
 import { Device } from '../devices';
+import { ComponentLike } from '../components';
+import { RpcHandler } from '../rpc';
 import { applyStatusNotification } from './create-device';
+
+class TestDevice extends Device {}
 
 describe('applyStatusNotification', () => {
     it('skips null component payloads', () => {
         const update = vi.fn();
-        const device = {
-            getComponent: vi.fn((key: string) => (key === 'wifi' ? { update } : undefined)),
-        } as unknown as Device;
+        const handler = { on: vi.fn() } as unknown as RpcHandler;
+        const device = new TestDevice({ id: 'test', mac: 'test' }, handler);
+        const getComponent = vi
+            .spyOn(device, 'getComponent')
+            .mockImplementation((key) => (key === 'wifi' ? ({ update } as unknown as ComponentLike) : undefined));
 
         applyStatusNotification(device, {
             ts: 1,
@@ -14,8 +20,8 @@ describe('applyStatusNotification', () => {
             wifi: { connected: true },
         });
 
-        expect(device.getComponent).toHaveBeenCalledWith('wifi');
+        expect(getComponent).toHaveBeenCalledWith('wifi');
         expect(update).toHaveBeenCalledWith({ connected: true });
-        expect(device.getComponent).not.toHaveBeenCalledWith('test');
+        expect(getComponent).not.toHaveBeenCalledWith('test');
     });
 });
