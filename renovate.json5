@@ -1,0 +1,50 @@
+{
+    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+    extends: ['config:recommended', ':automergeLinters', ':automergeTesters', ':automergeTypes'],
+    addLabels: ['dependencies'],
+    // CI runs on pull requests, not Renovate branch pushes.
+    automergeType: 'pr',
+    prConcurrentLimit: 5,
+    rebaseWhen: 'behind-base-branch',
+    semanticCommits: 'enabled',
+    semanticCommitType: 'chore',
+    semanticCommitScope: 'deps',
+    vulnerabilityAlerts: {
+        enabled: true,
+        addLabels: ['security-update'],
+    },
+    lockFileMaintenance: {
+        enabled: true,
+        automerge: true,
+    },
+    packageRules: [
+        {
+            matchUpdateTypes: ['patch'],
+            matchCurrentAge: '2 days',
+            automerge: true,
+            addLabels: ['automerge:patch'],
+        },
+        {
+            matchUpdateTypes: ['minor'],
+            matchCurrentAge: '5 days',
+            automerge: true,
+            addLabels: ['automerge:minor'],
+        },
+        {
+            matchDepTypes: ['devDependencies'],
+            matchUpdateTypes: ['patch'],
+            matchCurrentAge: '1 day',
+            automerge: true,
+            addLabels: ['automerge:dev-patch'],
+        },
+        {
+            matchUpdateTypes: ['major'],
+            automerge: false,
+            addLabels: ['manual-review:major'],
+            reviewers: ['lucavb'],
+        },
+    ],
+    timezone: 'Europe/Berlin',
+    minimumReleaseAge: '2 days',
+    fetchChangeLogs: 'pr',
+}
