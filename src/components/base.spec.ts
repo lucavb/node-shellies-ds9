@@ -34,20 +34,20 @@ class TestDevice extends Device {
 }
 
 interface TestAttributes {
-    characteristic1: number;
+    characteristic1: number | null;
     characteristic2: boolean;
-    characteristic3: CompoundCharacteristic;
+    characteristic3: CompoundCharacteristic | null;
 }
 
 class TestComponent extends Component<TestAttributes, null, null> {
     @characteristic
-    readonly characteristic1: number = 0;
+    readonly characteristic1: number | null = 0;
 
     @characteristic
     readonly characteristic2: boolean = false;
 
     @characteristic
-    readonly characteristic3: CompoundCharacteristic = {
+    readonly characteristic3: CompoundCharacteristic | null = {
         characteristic1: null,
         characteristic2: 0,
     };
@@ -151,6 +151,26 @@ describe('Component', () => {
             });
 
             expect(listener).toHaveBeenCalledTimes(0);
+        });
+
+        test('replaces a compound object with null', () => {
+            component.update({ characteristic3: null });
+
+            expect(component.characteristic3).toBeNull();
+        });
+
+        test('assigns all values before emitting change notifications, including nulls', () => {
+            let observedCharacteristic1: number | null | undefined;
+            component.on('change', (name) => {
+                if (name === 'characteristic3') {
+                    observedCharacteristic1 = component.characteristic1;
+                }
+            });
+
+            component.update({ characteristic1: null, characteristic2: true, characteristic3: null });
+
+            expect(observedCharacteristic1).toBeNull();
+            expect(component.characteristic2).toBe(true);
         });
 
         test('ignores unknown attributes', () => {

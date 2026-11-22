@@ -117,15 +117,23 @@ export abstract class ComponentBase extends EventEmitter implements ComponentLik
                 continue;
             }
 
-            if (typeof data[c] === 'object' && this[c]) {
+            const current = this[c];
+            const incoming = data[c];
+
+            if (incoming !== null && typeof incoming === 'object' && current !== null && typeof current === 'object') {
                 // if this is an object, we need to check for deep equality
-                if (equal(data[c], this[c])) {
+                if (equal(incoming, current)) {
                     // skip if nothing has changed
                     continue;
                 }
 
-                // copy the attributes of the characteristic
-                Object.assign(this[c], data[c]);
+                if (Array.isArray(incoming) || Array.isArray(current)) {
+                    // Arrays are complete characteristic values, not partial objects.
+                    this[c] = incoming;
+                } else {
+                    // copy the attributes of the characteristic
+                    Object.assign(current, incoming);
+                }
             } else {
                 if (data[c] === this[c]) {
                     // skip if the value is unchanged
