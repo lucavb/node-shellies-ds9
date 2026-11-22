@@ -93,5 +93,31 @@ describe('ShellyService', () => {
                 include: ['status', 'config'],
             });
         });
+
+        test('throws when a page is empty before the advertised total', async () => {
+            const request = vi
+                .fn()
+                .mockResolvedValueOnce({
+                    components: [{ key: 'switch:0' }],
+                    cfg_rev: 1,
+                    offset: 0,
+                    total: 2,
+                })
+                .mockResolvedValueOnce({
+                    components: [],
+                    cfg_rev: 1,
+                    offset: 1,
+                    total: 2,
+                });
+
+            device = new TestDevice();
+            (device.rpcHandler as TestRpcHandler).request = request;
+            service = new ShellyService(device);
+
+            await expect(service.getAllComponents(['status', 'config'])).rejects.toThrow(
+                'Shelly.GetComponents returned an empty page before discovery was complete',
+            );
+            expect(request).toHaveBeenCalledTimes(2);
+        });
     });
 });

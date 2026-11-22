@@ -16,6 +16,7 @@ export class DynamicComponent extends EventEmitter {
 
     private _status: Record<string, unknown> = {};
     private _config: Record<string, unknown> | undefined;
+    private _attrs: Record<string, unknown> | undefined;
 
     constructor(device: Device, parsed: ParsedComponentKey) {
         super();
@@ -40,6 +41,31 @@ export class DynamicComponent extends EventEmitter {
      */
     get config(): Readonly<Record<string, unknown>> | undefined {
         return this._config;
+    }
+
+    /**
+     * Metadata reported for this component by Shelly.GetComponents, if present.
+     */
+    get attrs(): Readonly<Record<string, unknown>> | undefined {
+        return this._attrs;
+    }
+
+    /**
+     * Updates component metadata when a discovery response includes valid attrs.
+     * Missing or malformed attrs are ignored, so partial inventories do not
+     * erase metadata already known for a component.
+     */
+    updateAttrs(value: unknown) {
+        if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+            return;
+        }
+
+        const prototype = Object.getPrototypeOf(value);
+        if (prototype !== Object.prototype && prototype !== null) {
+            return;
+        }
+
+        this._attrs = value as Record<string, unknown>;
     }
 
     set config(value: Record<string, unknown> | undefined) {

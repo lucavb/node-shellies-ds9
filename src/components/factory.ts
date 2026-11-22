@@ -86,6 +86,10 @@ function createServiceComponent(
 }
 
 function seedComponent(component: ComponentLike, entry: ShellyComponentInfo) {
+    if (component instanceof DynamicComponent && entry.attrs !== undefined) {
+        component.updateAttrs(entry.attrs);
+    }
+
     if (entry.status) {
         component.update(entry.status);
     }

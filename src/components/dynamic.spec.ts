@@ -53,6 +53,19 @@ describe('DynamicComponent', () => {
         expect(listener).toHaveBeenCalledWith(false);
     });
 
+    test('exposes valid attrs and ignores absent or malformed metadata updates', () => {
+        component.updateAttrs({ flags: 17, model_id: 8 });
+
+        expect(component.attrs).toEqual({ flags: 17, model_id: 8 });
+
+        component.updateAttrs(undefined);
+        component.updateAttrs(null);
+        component.updateAttrs(['invalid']);
+        component.updateAttrs('invalid');
+
+        expect(component.attrs).toEqual({ flags: 17, model_id: 8 });
+    });
+
     test('calls RPC methods with the parsed component name and id', async () => {
         await component.call('Set', { value: true });
 

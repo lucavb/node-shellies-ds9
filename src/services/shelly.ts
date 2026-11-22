@@ -149,6 +149,7 @@ export interface ShellyComponentInfo {
     key: string;
     status?: Record<string, unknown>;
     config?: Record<string, unknown>;
+    attrs?: Record<string, unknown>;
 }
 
 export interface ShellyComponents {
@@ -214,8 +215,20 @@ export class ShellyService extends Service {
         do {
             const page = await this.getComponents({ offset, include });
             components.push(...page.components);
-            offset += page.components.length;
             total = page.total;
+
+            if (page.components.length === 0) {
+                if (offset < total) {
+                    throw new Error('Shelly.GetComponents returned an empty page before discovery was complete');
+                }
+                break;
+            }
+
+            const nextOffset = offset + page.components.length;
+            if (nextOffset <= offset) {
+                throw new Error('Shelly.GetComponents pagination stalled before discovery was complete');
+            }
+            offset = nextOffset;
         } while (offset < total);
 
         return components;
