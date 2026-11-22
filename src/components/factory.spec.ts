@@ -7,6 +7,8 @@ import { DynamicComponent } from './dynamic';
 import { Humidity } from './humidity';
 import { createComponent } from './factory';
 import { Temperature } from './temperature';
+import { EM, EM1, EM1Data, EMData } from './energy-meter';
+import { RGB, RGBW } from './rgb';
 
 class TestRpcHandler extends RpcHandler {
     constructor() {
@@ -94,6 +96,17 @@ describe('createComponent', () => {
 
         expect(component).toBeInstanceOf(DynamicComponent);
         expect(component.key).toBe('boolean:200');
+    });
+
+    test.each([
+        ['em:0', EM],
+        ['em1:2', EM1],
+        ['emdata:0', EMData],
+        ['em1data:2', EM1Data],
+        ['rgb:0', RGB],
+        ['rgbw:0', RGBW],
+    ])('creates typed energy component %s', (key, ComponentClass) => {
+        expect(createComponent(device, { key })).toBeInstanceOf(ComponentClass);
     });
 
     test('reuses the device system component for sys', () => {

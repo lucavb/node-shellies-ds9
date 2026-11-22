@@ -1,7 +1,9 @@
 import type { Cover } from './cover';
+import type { EM, EM1, EM1Data, EMData } from './energy-meter';
 import type { Humidity } from './humidity';
 import type { Input } from './input';
 import type { Light } from './light';
+import type { RGB, RGBW } from './rgb';
 import type { Switch } from './switch';
 import type { Temperature } from './temperature';
 
@@ -35,6 +37,12 @@ export interface TypedComponentMap {
     [K: `input:${number}`]: Input;
     [K: `temperature:${number}`]: Temperature;
     [K: `humidity:${number}`]: Humidity;
+    [K: `em:${number}`]: EM;
+    [K: `em1:${number}`]: EM1;
+    [K: `emdata:${number}`]: EMData;
+    [K: `em1data:${number}`]: EM1Data;
+    [K: `rgb:${number}`]: RGB;
+    [K: `rgbw:${number}`]: RGBW;
 }
 
 const FUNCTIONAL_KEY_PATTERN = /^(switch|cover|light|input):(\d+)$/;

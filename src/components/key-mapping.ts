@@ -29,9 +29,16 @@ export const SENSOR_TYPE_TO_RPC = {
 export const DYNAMIC_TYPE_TO_RPC = {
     bthomesensor: 'BTHomeSensor',
     bthomedevice: 'BTHomeDevice',
+    blugw: 'BluGw',
+    blutrv: 'BluTrv',
+    em: 'EM',
+    em1: 'EM1',
     em1data: 'EM1Data',
     emdata: 'EMData',
     pm1: 'PM1',
+    rgb: 'RGB',
+    rgbw: 'RGBW',
+    plusrgbwpm: 'PlusRGBWPM',
 } as const satisfies Record<string, string>;
 
 export const SERVICE_KEY_TO_RPC = {

@@ -6,6 +6,7 @@ import { Cloud } from './cloud';
 import { Cover } from './cover';
 import { DevicePower } from './device-power';
 import { DynamicComponent } from './dynamic';
+import { EM, EM1, EM1Data, EMData } from './energy-meter';
 import { Ethernet } from './ethernet';
 import { HtUi } from './ht-ui';
 import { Humidity } from './humidity';
@@ -14,10 +15,20 @@ import { Light } from './light';
 import { ParsedComponentKey, parseComponentKey } from './key-mapping';
 import { Mqtt } from './mqtt';
 import { OutboundWebSocket } from './outbound-websocket';
+import { RGB, RGBW } from './rgb';
 import { Switch } from './switch';
 import { Temperature } from './temperature';
 import { Ui } from './ui';
 import { WiFi } from './wifi';
+
+const TYPED_COMPONENTS = new Map<string, new (device: Device, id: number) => ComponentLike>([
+    ['em', EM],
+    ['em1', EM1],
+    ['emdata', EMData],
+    ['em1data', EM1Data],
+    ['rgb', RGB],
+    ['rgbw', RGBW],
+]);
 
 function createSensorComponent(device: Device, parsed: Extract<ParsedComponentKey, { kind: 'sensor' }>) {
     switch (parsed.type) {
@@ -122,7 +133,14 @@ export function createComponent(device: Device, entry: ShellyComponentInfo): Com
             component = createServiceComponent(device, parsed);
             break;
         case 'unknown':
-            component = new DynamicComponent(device, parsed);
+            {
+                const match = /^([a-z0-9]+):\d+$/.exec(parsed.key);
+                const ComponentClass = match ? TYPED_COMPONENTS.get(match[1]) : undefined;
+                component =
+                    ComponentClass && parsed.id !== undefined
+                        ? new ComponentClass(device, parsed.id)
+                        : new DynamicComponent(device, parsed);
+            }
             break;
         default: {
             const _exhaustive: never = parsed;

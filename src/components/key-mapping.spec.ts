@@ -69,6 +69,22 @@ describe('parseComponentKey', () => {
         });
     });
 
+    test.each([
+        ['em:0', 'EM', 0],
+        ['em1:2', 'EM1', 2],
+        ['emdata:0', 'EMData', 0],
+        ['em1data:2', 'EM1Data', 2],
+        ['blutrv:200', 'BluTrv', 200],
+        ['rgb:0', 'RGB', 0],
+        ['rgbw:0', 'RGBW', 0],
+    ])('maps %s to the exact %s RPC namespace', (key, rpcName, id) => {
+        expect(parseComponentKey(key)).toEqual({ kind: 'unknown', key, rpcName, id });
+    });
+
+    test('maps the gateway service to its exact RPC namespace', () => {
+        expect(parseComponentKey('blugw')).toEqual({ kind: 'unknown', key: 'blugw', rpcName: 'BluGw' });
+    });
+
     test('falls back to heuristic for unlisted dynamic types', () => {
         const parsed = parseComponentKey('boolean:200');
 
