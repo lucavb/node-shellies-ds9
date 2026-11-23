@@ -99,6 +99,14 @@ export class DynamicComponent extends EventEmitter {
         this._attrs = value as Record<string, unknown>;
     }
 
+    /**
+     * Replaces the component configuration and emits `change:config` when the
+     * value actually changes (deep equality, like status fields).
+     *
+     * Listeners receive `(current, previous, update)`, where `update` is the
+     * status payload from the same synchronous turn, if any. See
+     * {@link pendingUpdate}.
+     */
     set config(value: Record<string, unknown> | undefined) {
         const previous = this._config;
         if (equal(previous, value)) {

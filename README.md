@@ -242,7 +242,7 @@ When `genericDevices` is enabled:
 Dynamic components (for example `blutrv:*` on a BLU gateway) expose the observations needed to track configuration and identity changes:
 
 - Top-level status arrays (such as `errors`) are complete values and replace the previous array; object status fields still merge field-by-field
-- `change:config` fires when a component's config is assigned, with `(current, previous, update)`; `update` is the status payload from the same synchronous turn when the config arrived alongside a `Shelly.GetComponents` entry, otherwise `undefined`
+- `change:config` fires when a component's config changes, with `(current, previous, update)`; re-assigning an identical config does not emit. `update` is the status payload from the same synchronous turn (including a retained `Shelly.GetComponents` entry), otherwise `undefined`
 - `component.pendingUpdate` exposes that same status payload during the turn, and `component.updateDepth` is non-zero while an update (including nested updates) is on the stack
 
 `genericDevices` defaults to `false` today and may default to `true` in a future major release.
