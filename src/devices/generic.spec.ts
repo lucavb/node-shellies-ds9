@@ -244,7 +244,9 @@ describe('GenericDevice', () => {
             components: [
                 {
                     key: 'blutrv:12',
-                    status: { current_C: 22, rsv: 4 },
+                    // Partial status: the correlation payload must be this raw
+                    // update, not the merged { current_C: 21, rsv: 4 }.
+                    status: { rsv: 4 },
                     config: { addr: '11:22:33:44:55:66' },
                 },
             ],
@@ -257,11 +259,7 @@ describe('GenericDevice', () => {
         // The retained component is updated, not replaced, and the config
         // arrives with the status payload from the same GetComponents entry.
         expect(device.get('blutrv:12')).toBe(trv);
-        expect(listener).toHaveBeenCalledWith(
-            { addr: '11:22:33:44:55:66' },
-            { addr: 'aa:bb:cc:dd:ee:ff' },
-            { current_C: 22, rsv: 4 },
-        );
+        expect(listener).toHaveBeenCalledWith({ addr: '11:22:33:44:55:66' }, { addr: 'aa:bb:cc:dd:ee:ff' }, { rsv: 4 });
     });
 
     test('iterates discovered components including sys', async () => {
