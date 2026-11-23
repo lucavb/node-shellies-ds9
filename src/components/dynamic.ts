@@ -17,6 +17,10 @@ export class DynamicComponent extends EventEmitter {
     private _status: Record<string, unknown> = {};
     private _config: Record<string, unknown> | undefined;
     private _attrs: Record<string, unknown> | undefined;
+    private _updateDepth = 0;
+    private _updateRevision = 0;
+    private _pendingUpdateRevision = 0;
+    private _pendingUpdate: Record<string, unknown> | undefined;
 
     constructor(device: Device, parsed: ParsedComponentKey) {
         super();
@@ -51,6 +55,33 @@ export class DynamicComponent extends EventEmitter {
     }
 
     /**
+     * Number of {@link update} calls currently on the stack.
+     *
+     * This is `0` outside of an update and non-zero inside change listeners,
+     * including while a nested/reentrant update is in progress. Consumers use
+     * it to defer work that must only run once a whole update has settled.
+     */
+    get updateDepth(): number {
+        return this._updateDepth;
+    }
+
+    /**
+     * The status payload of the update most recently started in the current
+     * synchronous turn, or `undefined`.
+     *
+     * Shelly.GetComponents delivers a component's status and config in one
+     * synchronous step: `update(status)` followed by `config = entry.config`.
+     * While that turn is running this getter returns the status payload, allowing a
+     * `change:config` listener to correlate the config change with the status
+     * update it arrived with. The value is cleared on a microtask, so later
+     * config assignments (for example `Device.loadConfig()`) report no
+     * accompanying update.
+     */
+    get pendingUpdate(): Readonly<Record<string, unknown>> | undefined {
+        return this._pendingUpdate;
+    }
+
+    /**
      * Updates component metadata when a discovery response includes valid attrs.
      * Missing or malformed attrs are ignored, so partial inventories do not
      * erase metadata already known for a component.
@@ -69,40 +100,84 @@ export class DynamicComponent extends EventEmitter {
     }
 
     set config(value: Record<string, unknown> | undefined) {
+        const previous = this._config;
+        if (equal(previous, value)) {
+            return;
+        }
+
         this._config = value;
+
+        // Emitted synchronously, in the same style as `change:<field>` for
+        // status characteristics, so listener context binding and reentrancy
+        // behave identically. `pendingUpdate` is passed as the third argument
+        // so a config change that arrived with a status update can be
+        // correlated without any per-consumer bookkeeping.
+        this.emit('change:config', value, previous, this._pendingUpdate);
     }
 
     /**
      * Updates status fields and emits change events for modified values.
+     *
+     * Top-level arrays are complete values and replace the previous array, the
+     * same way `ComponentBase.update()` treats array characteristics. Object
+     * values keep merging field-by-field so partial notifications do not erase
+     * unrelated fields.
      */
     update(data: Record<string | number | symbol, unknown>) {
-        const changed = new Set<string>();
+        const revision = ++this._updateRevision;
+        this._pendingUpdateRevision = revision;
+        this._pendingUpdate = { ...data };
+        queueMicrotask(() => {
+            // Only the most recent update owns the pending payload. A nested
+            // update therefore neither clears its parent's correlation early
+            // nor gets cleared by the parent's queued microtask.
+            if (this._pendingUpdateRevision === revision) {
+                this._pendingUpdateRevision = 0;
+                this._pendingUpdate = undefined;
+            }
+        });
 
-        for (const field of Object.keys(data)) {
-            const next = data[field];
-            const current = this._status[field];
+        this._updateDepth++;
+        try {
+            const changed = new Set<string>();
 
-            if (typeof next === 'object' && next !== null && typeof current === 'object' && current !== null) {
-                if (equal(next, current)) {
-                    continue;
+            for (const field of Object.keys(data)) {
+                const next = data[field];
+                const current = this._status[field];
+
+                if (typeof next === 'object' && next !== null && typeof current === 'object' && current !== null) {
+                    if (equal(next, current)) {
+                        continue;
+                    }
+
+                    if (Array.isArray(next) || Array.isArray(current)) {
+                        // Arrays are complete values; never merge their
+                        // elements into the previous array.
+                        this._status[field] = next;
+                    } else {
+                        this._status[field] = {
+                            ...(current as Record<string, unknown>),
+                            ...(next as Record<string, unknown>),
+                        };
+                    }
+                } else {
+                    if (equal(next, current)) {
+                        continue;
+                    }
+
+                    this._status[field] = next;
                 }
 
-                this._status[field] = { ...(current as Record<string, unknown>), ...(next as Record<string, unknown>) };
-            } else {
-                if (equal(next, current)) {
-                    continue;
-                }
-
-                this._status[field] = next;
+                changed.add(field);
             }
 
-            changed.add(field);
-        }
-
-        for (const field of changed) {
-            const value = this._status[field];
-            this.emit('change', field, value);
-            this.emit(`change:${field}`, value);
+            for (const field of changed) {
+                const value = this._status[field];
+                this.emit('change', field, value);
+                this.emit(`change:${field}`, value);
+            }
+        } finally {
+            this._updateDepth--;
         }
     }
 

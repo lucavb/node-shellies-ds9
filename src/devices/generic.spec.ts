@@ -217,6 +217,53 @@ describe('GenericDevice', () => {
         expect(malformed.attrs).toEqual({ flags: 4 });
     });
 
+    test('emits change:config with the status update during retained GetComponents rediscovery', async () => {
+        const rpcHandler = new TestRpcHandler();
+        let inventory = {
+            components: [
+                {
+                    key: 'blutrv:12',
+                    status: { current_C: 21, rsv: 3 },
+                    config: { addr: 'aa:bb:cc:dd:ee:ff' },
+                },
+            ],
+            cfg_rev: 1,
+            offset: 0,
+            total: 1,
+        };
+        rpcHandler.request.mockImplementation((method: string) =>
+            method === 'Shelly.GetComponents' ? Promise.resolve(inventory) : Promise.resolve({}),
+        );
+
+        const device = await GenericDevice.create(info, rpcHandler);
+        const trv = device.get('blutrv:12') as DynamicComponent;
+        const listener = vi.fn();
+        trv.on('change:config', listener);
+
+        inventory = {
+            components: [
+                {
+                    key: 'blutrv:12',
+                    status: { current_C: 22, rsv: 4 },
+                    config: { addr: '11:22:33:44:55:66' },
+                },
+            ],
+            cfg_rev: 2,
+            offset: 0,
+            total: 1,
+        };
+        await device.rediscoverComponents();
+
+        // The retained component is updated, not replaced, and the config
+        // arrives with the status payload from the same GetComponents entry.
+        expect(device.get('blutrv:12')).toBe(trv);
+        expect(listener).toHaveBeenCalledWith(
+            { addr: '11:22:33:44:55:66' },
+            { addr: 'aa:bb:cc:dd:ee:ff' },
+            { current_C: 22, rsv: 4 },
+        );
+    });
+
     test('iterates discovered components including sys', async () => {
         const rpcHandler = new TestRpcHandler();
         rpcHandler.request.mockResolvedValue({

@@ -74,6 +74,141 @@ describe('DynamicComponent', () => {
         });
     });
 
+    test('replaces a previously merged errors array instead of retaining stale elements', () => {
+        const change = vi.fn();
+        component.on('change:errors', change);
+
+        // Shelly energy meters report the active errors as a complete array.
+        component.update({ errors: ['voltage', 'current', 'power'] });
+        component.update({ errors: ['current'] });
+
+        expect(component.status.errors).toEqual(['current']);
+        expect(Array.isArray(component.status.errors)).toBe(true);
+        expect(change).toHaveBeenLastCalledWith(['current']);
+    });
+
+    test('an empty array clears a previously populated array value', () => {
+        component.update({ errors: ['voltage'] });
+        component.update({ errors: [] });
+
+        expect(component.status.errors).toEqual([]);
+    });
+
+    test('still merges top-level object fields while arrays stay complete values', () => {
+        // Mixed payload: scalar and nested object fields merge across partial
+        // notifications, the top-level array does not.
+        component.update({
+            id: 0,
+            errors: ['voltage', 'current'],
+            details: { model: 'plus-1pm', channel: 0 },
+        });
+        component.update({
+            errors: ['power'],
+            details: { channel: 1 },
+        });
+
+        expect(component.status).toEqual({
+            id: 0,
+            errors: ['power'],
+            details: { model: 'plus-1pm', channel: 1 },
+        });
+    });
+
+    test('emits change:config with previous and current config on assignment', () => {
+        const listener = vi.fn();
+        component.on('change:config', listener);
+
+        component.config = { name: 'Kitchen' };
+        component.config = { name: 'Office' };
+
+        expect(listener).toHaveBeenNthCalledWith(1, { name: 'Kitchen' }, undefined, undefined);
+        expect(listener).toHaveBeenNthCalledWith(2, { name: 'Office' }, { name: 'Kitchen' }, undefined);
+    });
+
+    test('does not emit change:config when the assigned config is identical', () => {
+        const listener = vi.fn();
+        component.on('change:config', listener);
+        const config = { name: 'Kitchen' };
+        component.config = config;
+
+        component.config = config;
+        component.config = { name: 'Kitchen' };
+
+        expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    test('supports listener context on change:config', () => {
+        const context = { seen: 0 };
+        component.on(
+            'change:config',
+            function (this: { seen: number }) {
+                this.seen++;
+            },
+            context,
+        );
+
+        component.config = { name: 'Kitchen' };
+
+        expect(context.seen).toBe(1);
+    });
+
+    test('correlates a config assignment with the status update it arrived with', () => {
+        const listener = vi.fn();
+        component.on('change:config', listener);
+
+        // This is the Shelly.GetComponents shape: status then config in one turn.
+        component.update({ current_C: 21, rsv: 3 });
+        component.config = { addr: 'aa:bb:cc:dd:ee:ff' };
+
+        expect(listener).toHaveBeenCalledWith({ addr: 'aa:bb:cc:dd:ee:ff' }, undefined, { current_C: 21, rsv: 3 });
+        expect(component.pendingUpdate).toEqual({ current_C: 21, rsv: 3 });
+    });
+
+    test('exposes updateDepth and pendingUpdate to change listeners, then clears pendingUpdate', async () => {
+        const depths: number[] = [];
+        const pending: Array<Readonly<Record<string, unknown>> | undefined> = [];
+        component.on('change:value', () => {
+            depths.push(component.updateDepth);
+            pending.push(component.pendingUpdate);
+        });
+
+        component.update({ value: true });
+
+        expect(depths).toEqual([1]);
+        expect(pending).toEqual([{ value: true }]);
+        expect(component.updateDepth).toBe(0);
+        expect(component.pendingUpdate).toEqual({ value: true });
+
+        await Promise.resolve();
+
+        expect(component.pendingUpdate).toBeUndefined();
+    });
+
+    test('delivers every change from nested/reentrant updates without swallowing events', () => {
+        const outer = vi.fn();
+        const inner = vi.fn();
+        const depths: number[] = [];
+
+        component.on('change:outer', (value) => {
+            outer(value);
+            depths.push(component.updateDepth);
+            if (value === 1) {
+                component.update({ inner: 1 });
+            }
+        });
+        component.on('change:inner', (value) => {
+            inner(value);
+            depths.push(component.updateDepth);
+        });
+
+        component.update({ outer: 1 });
+
+        expect(outer).toHaveBeenCalledWith(1);
+        expect(inner).toHaveBeenCalledWith(1);
+        expect(depths).toEqual([1, 2]);
+        expect(component.updateDepth).toBe(0);
+    });
+
     test('passes id to GetStatus for keyed components', () => {
         component.getStatus();
 
