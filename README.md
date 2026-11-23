@@ -35,6 +35,7 @@ Handles communication with the next generation of Shelly devices.
 - [Shelly Plus 1 + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1)
 - [Shelly 1L Gen3](https://kb.shelly.cloud/knowledge-base/shelly-1l-gen3)
 - [Shelly Plus 1 PM + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1PM)
+- [Ogemray Smart Relay 25A (SW40 PbS)](https://www.shelly.com/products/ogemray-25a-smart-relay)
 - [Shelly Plus 1 Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1)
 - [Shelly Plus 1 PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlus1PM)
 - [Shelly Plus PM Mini + V3](https://shelly-api-docs.shelly.cloud/gen2/Devices/Gen2/ShellyPlusPMMini)

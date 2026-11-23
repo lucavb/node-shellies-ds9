@@ -44,6 +44,7 @@ describe('public device registration and seeded initialization', () => {
         ['S4DM-0A102US', api.ShellyDimmerGen4US],
         ['SNDC-0D4P10WW', api.ShellyPlusRGBWPM],
         ['SPSW-202XE12UL', api.ShellyPro2Rev2Ul],
+        ['S3PB-O3AR000001', api.Ogemray25A],
     ])('public entry registers %s', (model, expectedClass) => {
         expect(api.Device.getClass(model)).toBe(expectedClass);
     });
@@ -79,6 +80,20 @@ describe('public device registration and seeded initialization', () => {
         expect(meter?.getComponent('em:0')).toBeInstanceOf(api.EM);
         expect(meter?.hasComponent('switch:0')).toBe(false);
         expect(meter?.getComponent('switch:0')).toBeUndefined();
+    });
+
+    test('creates the Ogemray relay from seeded switch status', async () => {
+        const relay = await createDeviceFromInfo(info('S3PB-O3AR000001'), new TestRpcHandler(), {
+            genericDevices: false,
+            seedStatus: {
+                ts: 4,
+                'switch:0': { id: 0, output: true, apower: 12.3, voltage: 230.1, current: 0.053 },
+            },
+        });
+
+        expect(relay).toBeInstanceOf(api.Ogemray25A);
+        expect(relay).toBeInstanceOf(api.ShellyPlus1Pm);
+        expect((relay?.getComponent('switch:0') as api.Switch).apower).toBe(12.3);
     });
 
     test('creates no-profile RGBW PM from seeded RGB status and surfaces measurements and inputs', async () => {

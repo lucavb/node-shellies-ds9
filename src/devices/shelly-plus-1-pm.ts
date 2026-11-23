@@ -57,3 +57,16 @@ export class ShellyPlus1PmV3 extends ShellyPlus1Pm {
 }
 
 Device.registerClass(ShellyPlus1PmV3);
+
+/**
+ * Ogemray Smart Relay 25A (SW40 PbS).
+ *
+ * Gen3 device produced under the "Powered by Shelly" program. Same
+ * components as Shelly Plus 1 PM, including `switch:0` power metering.
+ */
+export class Ogemray25A extends ShellyPlus1Pm {
+    static readonly model: string = 'S3PB-O3AR000001';
+    static readonly modelName: string = 'Ogemray Smart Relay 25A';
+}
+
+Device.registerClass(Ogemray25A);
